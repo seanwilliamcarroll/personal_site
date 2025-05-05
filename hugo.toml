@@ -66,7 +66,11 @@ animate = true
   intro = "Hi, my name is"
   title = "Sean."
   subtitle = "Computer Engineer"
-  content = ""
+  content = """
+  MTS at AMD working on Performance Modeling Team  
+  Primarily writing C++11, Python3, and Rust at work  
+  Side projects in C++20, Rust, Haskell
+  """
   image = "images/profile_picture.png"
 
     [params.hero.bottomImage]
@@ -101,78 +105,56 @@ I am currently working on a project that will be used to help people find the be
   enable = true
 
     [[params.experience.items]]
-    job = "Senior Software Developer"
-    company = "Facebook"
-    companyUrl = "https://example.com"
-    date = "Jan 2022 - present"
-    content = "I am currently working as a software developer at [example org.](https://example.com) in San Francisco, CA. I am currently working on a project that will be used to help people find the best way to get around the city."
-
-      [params.experience.items.featuredLink]
-      enable = true
-      name = "View the project"
-      url = "https://example.com"
+    job = "Member of Technical Staff"
+    company = "AMD"
+    companyUrl = "https://amd.com"
+    date = "Aug 2022 - present"
+    content = """
+ - Leading case studies using variety of proprietary models at different levels of abstraction to balance the needs for rapid prototyping as well as accurately predicting bottlenecks and architectural inefficiencies, models written in C++11 and Python3  
+ - Creating lightweight and flexible data collection library to enhance ability to quickly collect and collate data simulations using modern C++11 and Rust  
+ - Building coprocessor module for proprietary performance modeling simulator in C++11 while extending and refactoring existing modules for greater reuse and reduction of technical debt  
+ - Synthesizing and interpreting performance data for case study presentations to designers to forecast next generation of coprocessors using pandas, duckdb, and plotly Python libraries  
+ - Two papers accepted to internal conference concerning increasing efficiency and efficacy of methods used in performance modeling  
+    """
 
     [[params.experience.items]]
-    job = "Software Developer"
-    company = "Amazon"
-    companyUrl = "https://example.com"
-    date = "Sep 2020 - Dec 2021"
+    job = "Algorithm Engineer"
+    company = "Red Point Positioning"
+    companyUrl = "https://www.redpointpositioning.com/"
+    date = "Jan 2022 - Aug 2022"
     content = """
-I am currently working as a software developer at [example org.](https://example.com) in San Francisco, CA. I am currently working on a project that will be used to help people find the best way to get around the city.
+ - Reduced time to RTLS (Real-Time Location System) deployments through creation of newly designed GUI tool written in Python and leveraging pandas, numpy, and PyQt libraries
+ - Visualized the health of our RTLS deployments through development of a data-driven dashboard written in Python and leveraging pandas, numpy, dask, and dash libraries
+ - Achieved reuse of common utilities used by R&D team through creation of a Python package, including a submodule implementing an API client for interaction with live RTLS servers
+ - Introduced automation and testing methodologies to reduce technical debt with the creation of a CI flow for three projects, including linting and testing stages
 
-- Lead backend developer for a product.
-- Created a frontend design for a product.
 """
 
-      [params.experience.items.featuredLink]
-      enable = true
-      url = "https://example.com"
-
-      [params.experience.items.info]
-      enable = true
-      content = "I worked as a software developer for more than one year in Amazon."
-
     [[params.experience.items]]
-    job = "Junior Software Developer"
+    job = "Design Verification Engineer for Analog/Mixed Signal Group"
     company = "Apple"
-    companyUrl = "https://example.com"
-    date = "Jan 2020 - Aug 2020"
+    companyUrl = "https://apple.com"
+    date = "Aug 2021 - Jan 2022"
     content = """
-I am currently working as a software developer at [example org.](https://example.com) in San Francisco, CA. I am currently working on a project that will be used to help people find the best way to get around the city.
-
-- Lead backend developer for a product.
-- Created a frontend design for a product.
+ - Verified firmware-based component using SystemVerilog Assertions
 """
 
-      [params.experience.items.info]
-      enable = false
-
-      [params.experience.items.featuredLink]
-      enable = true
-      url = "https://example.com"
-
     [[params.experience.items]]
-    job = "UI/UX Designer"
-    company = "Netflix"
-    companyUrl = "https://example.com"
-    date = "June 2017 - Nov 2019"
+    job = "Computer Architect"
+    company = "Lightelligence"
+    companyUrl = "https://www.lightelligence.ai/"
+    date = "Mar 2020 - Aug 2021"
     content = """
-I am currently working as a software developer at [example org.](https://example.com) in San Francisco, CA. I am currently working on a project that will be used to help people find the best way to get around the city.
-
-- Lead backend developer for a product.
-- Created a frontend design for a product.
+ - Wrote a proprietary microarchitectural simulator in modern C++ using event-driven and OO programming paradigms with a Python front end
+ - Co-designed the final microarchitecture using a novel photonic network-on-chip of a linear algebra accelerator for ML workloads
+ - Conducted interviews resulting in growing the architecture team from 1 to 4 members
 """
-
-      [params.experience.items.featuredLink]
-      enable = true
-      url = "https://example.com"
-
-    [[params.experience.items]]
-    job = "Product Designer"
-    company = "Google"
-    companyUrl = "https://example.com"
-    date = "Feb 2016 - Mar 2017"
-    content = "I am currently working as a software developer at [example org.](https://example.com) in San Francisco, CA. I am currently working on a project that will be used to help people find the best way to get around the city."
+    job2 = "Design Verification Engineer"
+    date2 = "Nov 2019 - Mar 2020"
+    content2 = """
+ - Promoted efficiency through increased abstraction and automation by writing an extensible Python framework to generate RTL, DV, and C-based driver collateral from industry standard SystemRDL
+ - Bootstrapped gate level simulation (GLS) flow and solely responsible for all GLS verification of Lightelligence's first test chip
+"""
 
   [params.education]
   enable = true
