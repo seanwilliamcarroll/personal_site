@@ -32,7 +32,7 @@ unsafe = true
 [params]
 title = "Sean William Carroll"
 description = "Text about my cool site"
-# favicon = "/fav.png"
+favicon = "/images/favicon.ico"
 useBootstrapCDN = false
 mathjax = false
 animate = true
@@ -71,7 +71,7 @@ animate = true
   Primarily writing C++11, Python3, and Rust at work  
   Side projects in C++20, Rust, Haskell
   """
-  image = "images/profile_picture.png"
+  image = "https://avatars.githubusercontent.com/u/8582697?v=4"
 
     [params.hero.bottomImage]
     enable = true
@@ -194,17 +194,17 @@ I am a computer engineer with a strong interest in software!"""
   enable = false
 
   [params.projects]
-  enable = true
+  enable = false
 
-    [[params.projects.items]]
-    title = "Hugo Profile"
-    content = "A highly customizable and mobile first Hugo template for personal portfolio and blog."
-    image = "/images/projects/profile.png"
-    badges = [ "Hugo", "Bootstrap", "Javascript" ]
+    # [[params.projects.items]]
+    # title = "Hugo Profile"
+    # content = "A highly customizable and mobile first Hugo template for personal portfolio and blog."
+    # image = "/images/projects/profile.png"
+    # badges = [ "Hugo", "Bootstrap", "Javascript" ]
 
-      [[params.projects.items.links]]
-      icon = "fab fa-github"
-      url = "https://github.com/gurusabarish/hugo-profile"
+    #   [[params.projects.items.links]]
+    #   icon = "fab fa-github"
+    #   url = "https://github.com/gurusabarish/hugo-profile"
 
   [params.contact]
   enable = true
