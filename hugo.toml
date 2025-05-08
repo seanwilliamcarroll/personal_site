@@ -92,7 +92,11 @@ url = "https://github.com/seanwilliamcarroll"
   title = "About Me"
   image = "/images/sean_and_ali.png"
   content = """
-I am a computer engineer with a strong interest in software!"""
+  I am a computer engineer with a strong interest in software!  
+  I'm also interested in books, tv, film, and language learning, both computer and natural :)
+
+  ---   
+  """
 
     [params.about.skills]
     enable = true
@@ -194,17 +198,17 @@ I am a computer engineer with a strong interest in software!"""
   enable = false
 
   [params.projects]
-  enable = false
+  enable = true
 
-    # [[params.projects.items]]
-    # title = "Hugo Profile"
-    # content = "A highly customizable and mobile first Hugo template for personal portfolio and blog."
-    # image = "/images/projects/profile.png"
-    # badges = [ "Hugo", "Bootstrap", "Javascript" ]
+    [[params.projects.items]]
+    title = "Personal Site"
+    content = "The GitHub repo for this site!."
+    image = "/images/favicons/android-chrome-512x512.png"
+    badges = [ "Hugo"]
 
-    #   [[params.projects.items.links]]
-    #   icon = "fab fa-github"
-    #   url = "https://github.com/gurusabarish/hugo-profile"
+      [[params.projects.items.links]]
+      icon = "fab fa-github"
+      url = "https://github.com/seanwilliamcarroll/personal_site"
 
   [params.contact]
   enable = true
@@ -212,12 +216,12 @@ I am a computer engineer with a strong interest in software!"""
   btnName = "Mail me"
   btnLink = "mailto:seanwilliamcarroll+personal_site@gmail.com"
 
-# [params.footer.recentPosts]
-# path = "blogs"
-# count = 3
-# title = "Recent Posts"
-# enable = true
-# disableFeaturedImage = false
+[params.footer.recentPosts]
+path = "posts"
+count = 3
+title = "Recent Posts"
+enable = true
+disableFeaturedImage = false
 
 [params.footer.socialNetworks]
 github = "https://github.com/seanwilliamcarroll"
