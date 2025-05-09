@@ -15,12 +15,12 @@ pagerSize = 3
 [markup.goldmark.renderer]
 unsafe = true
 
-# [[Menus.main]]
-# identifier = "blog"
-# name = "Blog"
-# title = "Blog posts"
-# url = "/blogs"
-# weight = 1
+[[Menus.main]]
+identifier = "posts"
+name = "Posts"
+title = "Posts"
+url = "/posts"
+weight = 1
 
 # [[Menus.main]]
 # identifier = "gallery"
@@ -32,7 +32,7 @@ unsafe = true
 [params]
 title = "Sean William Carroll"
 description = "Text about my cool site"
-favicon = "/images/favicon.ico"
+favicon = "/images/favicons/favicon.ico"
 useBootstrapCDN = false
 mathjax = false
 animate = true
