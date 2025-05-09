@@ -101,7 +101,7 @@ url = "https://github.com/seanwilliamcarroll"
     [params.about.skills]
     enable = true
     title = "Some of the languages I've been working with recently:"
-    items = [ "C++11", "Python3", "Rust", "Haskell"]
+    items = [ "C++11", "Python3", "Rust", "Haskell", "Deutsch (B2)"]
 
   [params.experience]
   enable = true
