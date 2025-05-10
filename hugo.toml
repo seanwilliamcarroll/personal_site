@@ -1,266 +1,702 @@
 baseURL = 'https://example.org/'
-languageCode = 'en-us'
+languageCode = 'en'
 title = 'Sean William Carroll'
-theme = 'hugo-profile'
+theme = 'LoveIt'
+themesDir = "themes"
 
+# determines default content language ["en", "zh-cn", "fr", "pl", ...]
+defaultContentLanguage = "en"
+# language name ["English", "简体中文", "Français", "Polski", ...]
+languageName = "English"
+# whether to include Chinese/Japanese/Korean
+hasCJKLanguage = false
+
+# copyright description used only for seo schema
+copyright = ""
+
+# whether to use robots.txt
 enableRobotsTXT = true
+# whether to use git commit log
+enableGitInfo = true
+# whether to use emoji code
+enableEmoji = true
 
-[outputs]
-home = [ "HTML", "RSS", "JSON" ]
-page = [ "HTML", "RSS" ]
+# ignore some build errors
+ignoreErrors = ["error-remote-getjson", "error-missing-instagram-accesstoken"]
 
+# Pagination config
 [pagination]
-pagerSize = 3
+  disableAliases = false
+  pagerSize = 10
+  path = "page"
 
-[markup.goldmark.renderer]
-unsafe = true
-
-[[Menus.main]]
-identifier = "posts"
-name = "Posts"
-title = "Posts"
-url = "/posts"
-weight = 1
-
-# [[Menus.main]]
-# identifier = "gallery"
-# name = "Gallery"
-# title = "Blog posts"
-# url = "/gallery"
-# weight = 2
+# Menu config
+[menu]
+  [[menu.main]]
+    weight = 1
+    identifier = "posts"
+    # you can add extra information before the name (HTML format is supported), such as icons
+    pre = ""
+    # you can add extra information after the name (HTML format is supported), such as icons
+    post = ""
+    name = "Posts"
+    url = "/posts/"
+    # title will be shown when you hover on this menu link
+    title = ""
+  # [[menu.main]]
+  #   weight = 2
+  #   identifier = "tags"
+  #   pre = ""
+  #   post = ""
+  #   name = "Tags"
+  #   url = "/tags/"
+  #   title = ""
+  # [[menu.main]]
+  #   weight = 3
+  #   identifier = "categories"
+  #   pre = ""
+  #   post = ""
+  #   name = "Categories"
+  #   url = "/categories/"
+  #   title = ""
 
 [params]
-title = "Sean William Carroll"
-description = "Text about my cool site"
-favicon = "/images/favicons/favicon.ico"
-useBootstrapCDN = false
-mathjax = false
-animate = true
+  # site default theme ["auto", "light", "dark"]
+  defaultTheme = "auto"
+  # public git repo url only then enableGitInfo is true
+  gitRepo = "https://github.com/seanwilliamcarroll"
+  # which hash function used for SRI, when empty, no SRI is used
+  # ["sha256", "sha384", "sha512", "md5"]
+  fingerprint = ""
+  # date format
+  dateFormat = "2006-01-02"
+  # website title for Open Graph and Twitter Cards
+  title = "Sean William Carroll"
+  # website description for RSS, SEO, Open Graph and Twitter Cards
+  description = "Hugo theme - LoveIt"
+  # website images for Open Graph and Twitter Cards
+  images = ["/logo.png"]
 
-  [params.font]
-  fontSize = "1rem"
-  fontWeight = 400
-  lineHeight = 1.5
-  textAlign = "left"
+  # Author config
+  [params.author]
+    name = "Sean Carroll"
+    email = "seanwilliamcarroll+personal_site@gmail.com"
+    link = ""
 
-  [params.navbar]
-  align = "ms-auto"
-  brandName = "Sean Carroll"
-  disableSearch = true
-  enableSeparator = true
+  # Header config
+  [params.header]
+    # desktop header mode ["fixed", "normal", "auto"]
+    desktopMode = "fixed"
+    # mobile header mode ["fixed", "normal", "auto"]
+    mobileMode = "auto"
+    # Header title config
+    [params.header.title]
+      # URL of the LOGO
+      logo = ""
+      # title name
+      name = "Sean William Carroll"
+      # you can add extra information before the name (HTML format is supported), such as icons
+      pre = "<i class='fa-solid fa-desktop' aria-hidden='true'></i>"
+      # you can add extra information after the name (HTML format is supported), such as icons
+      post = ""
+      # whether to use typeit animation for title name
+      typeit = false
 
-    [params.navbar.stickyNavBar]
+  # Footer config
+  [params.footer]
     enable = true
-    showOnScrollUp = true
+    # Custom content (HTML format is supported)
+    custom = ""
+    # whether to show Hugo and theme info
+    hugo = true
+    # whether to show copyright info
+    copyright = true
+    # whether to show the author
+    author = true
+    # site creation time
+    since = 2025
+    # ICP info only in China (HTML format is supported)
+    icp = ""
+    # license info (HTML format is supported)
+    license= ''
 
-    [params.navbar.menus]
-    disableAbout = false
-    disableExperience = false
-    disableEducation = false
-    disableProjects = false
-    disableAchievements = true
-    disableContact = false
+  # Section (all posts) page config
+  [params.section]
+    # special amount of posts in each section page
+    paginate = 20
+    # date format (month and day)
+    dateFormat = "01-02"
+    # amount of RSS pages
+    rss = 10
 
-  [params.hero]
-  enable = true
-  intro = "Hi, my name is"
-  title = "Sean."
-  subtitle = "Computer Engineer"
-  content = """
-  MTS at AMD working on Performance Modeling Team  
-  Primarily writing C++11, Python3, and Rust at work  
-  Side projects in C++20, Rust, Haskell
-  """
-  image = "https://avatars.githubusercontent.com/u/8582697?v=4"
+  # List (category or tag) page config
+  [params.list]
+    # special amount of posts in each list page
+    paginate = 20
+    # date format (month and day)
+    dateFormat = "01-02"
+    # amount of RSS pages
+    rss = 10
 
-    [params.hero.bottomImage]
+  # App icon config
+  [params.app]
+    # optional site title override for the app when added to an iOS home screen or Android launcher
+    title = "Sean William Carroll"
+    # whether to omit favicon resource links
+    noFavicon = false
+    # modern SVG favicon to use in place of older style .png and .ico files
+    svgFavicon = "/images/favicons/favicon.ico"
+    # Android browser theme color
+    themeColor = "#ffffff"
+    # Safari mask icon color
+    iconColor = "#5bbad5"
+    # Windows v8-11 tile color
+    tileColor = "#da532c"
+
+  # Search config
+  [params.search]
     enable = true
+    # type of search engine ["lunr", "algolia"]
+    type = "algolia"
+    # max index length of the chunked content
+    contentLength = 4000
+    # placeholder of the search bar
+    placeholder = ""
+    # max number of results length
+    maxResultLength = 10
+    # snippet length of the result
+    snippetLength = 30
+    # HTML tag name of the highlight part in results
+    highlightTag = "em"
+    # whether to use the absolute URL based on the baseURL in search index
+    absoluteURL = false
+    [params.search.algolia]
+      index = ""
+      appID = ""
+      searchKey = ""
 
-    [params.hero.button]
-    enable = true
-    name = "Resume"
-    url = "/documents/resume.pdf"
-    download = true
-    newPage = false
+  # Home page config
+  [params.home]
+    # amount of RSS pages
+    rss = 10
+    # Home page profile
+    [params.home.profile]
+      enable = true
+      # Gravatar Email for preferred avatar in home page
+      gravatarEmail = ""
+      # URL of avatar shown in home page
+      avatarURL = "/images/profile_picture.png"
+      # title shown in home page (HTML format is supported)
+      title = ""
+      # subtitle shown in home page (HTML format is supported)
+      subtitle = "Welcome to my personal website!"
+      # whether to use typeit animation for subtitle
+      typeit = false
+      # whether to show social links
+      social = true
+      # disclaimer (HTML format is supported)
+      disclaimer = ""
+    # Home page posts
+    [params.home.posts]
+      enable = true
+      # special amount of posts in each home posts page
+      paginate = 6
+  # Social config in home page
+  [params.social]
+    GitHub = ""
+    Linkedin = ""
+    X = ""
+    Instagram = ""
+    Facebook = ""
+    Telegram = ""
+    Medium = ""
+    Gitlab = ""
+    Youtubelegacy = ""
+    Youtubecustom = ""
+    Youtubechannel = ""
+    Tumblr = ""
+    Quora = ""
+    Keybase = ""
+    Pinterest = ""
+    Reddit = ""
+    Codepen = ""
+    FreeCodeCamp = ""
+    Bitbucket = ""
+    Stackoverflow = ""
+    Weibo = ""
+    Odnoklassniki = ""
+    VK = ""
+    Flickr = ""
+    Xing = ""
+    Snapchat = ""
+    Soundcloud = ""
+    Spotify = ""
+    Bandcamp = ""
+    Paypal = ""
+    Fivehundredpx = ""
+    Mix = ""
+    Goodreads = ""
+    Lastfm = ""
+    Foursquare = ""
+    Hackernews = ""
+    Kickstarter = ""
+    Patreon = ""
+    Steam = ""
+    Twitch = ""
+    Strava = ""
+    Skype = ""
+    Whatsapp = ""
+    Zhihu = ""
+    Douban = ""
+    Angellist = ""
+    Slidershare = ""
+    Jsfiddle = ""
+    Deviantart = ""
+    Behance = ""
+    Dribbble = ""
+    Wordpress = ""
+    Vine = ""
+    Googlescholar = ""
+    Researchgate = ""
+    Mastodon = ""
+    Thingiverse = ""
+    Devto = ""
+    Gitea = ""
+    XMPP = ""
+    Matrix = ""
+    Bilibili = ""
+    Discord = ""
+    DiscordInvite = ""
+    Lichess = ""
+    ORCID = ""
+    Pleroma = ""
+    Kaggle = ""
+    MediaWiki = ""
+    Plume = ""
+    HackTheBox = ""
+    RootMe= ""
+    Malt = ""
+    TikTok = ""
+    TryHackMe = ""
+    Codeberg = ""
+    HuggingFace = ""
+    Threads = ""
+    Email = ""
+    RSS = ""
 
-[[params.hero.socialLinks.fontAwesomeIcons]]
-icon = "fab fa-github"
-url = "https://github.com/seanwilliamcarroll"
+  # Page global config
+  [params.page]
+    # whether to hide a page from home page
+    hiddenFromHomePage = false
+    # whether to hide a page from search results
+    hiddenFromSearch = false
+    # whether to enable twemoji
+    twemoji = false
+    # whether to enable lightgallery
+    lightgallery = false
+    # whether to enable the ruby extended syntax
+    ruby = true
+    # whether to enable the fraction extended syntax
+    fraction = true
+    # whether to enable the fontawesome extended syntax
+    fontawesome = true
+    # whether to show link to Raw Markdown content of the content
+    linkToMarkdown = true
+    # whether to show the full text content in RSS
+    rssFullText = false
+    # Table of the contents config
+    [params.page.toc]
+      # whether to enable the table of the contents
+      enable = true
+      # whether to keep the static table of the contents in front of the post
+      keepStatic = false
+      # whether to make the table of the contents in the sidebar automatically collapsed
+      auto = true
+    # Code config
+    [params.page.code]
+      # whether to show the copy button of the code block
+      copy = true
+      # the maximum number of lines of displayed code by default
+      maxShownLines = 50
+      [params.page.code.render]
+        goat = true
+        mermaid = true
+    # KaTeX mathematical formulas config (KaTeX https://katex.org/)
+    [params.page.math]
+      enable = false
+      # default inline delimiter is $ ... $ and \( ... \)
+      inlineLeftDelimiter = ""
+      inlineRightDelimiter = ""
+      # default block delimiter is $$ ... $$, \[ ... \], \begin{equation} ... \end{equation} and some other functions
+      blockLeftDelimiter = ""
+      blockRightDelimiter = ""
+      # KaTeX extension copy_tex
+      copyTex = true
+      # KaTeX extension mhchem
+      mhchem = true
+    # Mapbox GL JS config (Mapbox GL JS https://docs.mapbox.com/mapbox-gl-js)
+    [params.page.mapbox]
+      # access token of Mapbox GL JS
+      accessToken = "pk.eyJ1IjoiZGlsbG9uenEiLCJhIjoiY2s2czd2M2x3MDA0NjNmcGxmcjVrZmc2cyJ9.aSjv2BNuZUfARvxRYjSVZQ"
+      # style for the light theme
+      lightStyle = "mapbox://styles/mapbox/light-v10?optimize=true"
+      # style for the dark theme
+      darkStyle = "mapbox://styles/mapbox/dark-v10?optimize=true"
+      # whether to add NavigationControl (https://docs.mapbox.com/mapbox-gl-js/api/#navigationcontrol)
+      navigation = true
+      # whether to add GeolocateControl (https://docs.mapbox.com/mapbox-gl-js/api/#geolocatecontrol)
+      geolocate = true
+      # whether to add ScaleControl (https://docs.mapbox.com/mapbox-gl-js/api/#scalecontrol)
+      scale = true
+      # whether to add FullscreenControl (https://docs.mapbox.com/mapbox-gl-js/api/#fullscreencontrol)
+      fullscreen = true
+    # Social share links in post page
+    [params.page.share]
+      enable = true
+      X = true
+      Threads = true
+      Facebook = true
+      Linkedin = true
+      Whatsapp = false
+      Pinterest = false
+      Tumblr = false
+      HackerNews = false
+      Reddit = false
+      VK = false
+      Buffer = false
+      Xing = false
+      Line = false
+      Instapaper = false
+      Pocket = false
+      Flipboard = false
+      Weibo = false
+      Blogger = false
+      Baidu = false
+      Odnoklassniki = false
+      Evernote = false
+      Skype = false
+      Trello = false
+      Diaspora = false
+      Mix = false
+      Telegram = false
+    # Comment config
+    [params.page.comment]
+      enable = true
+      # Disqus comment config (https://disqus.com/)
+      [params.page.comment.disqus]
+        enable = false
+        # Disqus shortname to use Disqus in posts
+        shortname = ""
+      # Gitalk comment config (https://github.com/gitalk/gitalk)
+      [params.page.comment.gitalk]
+        enable = false
+        owner = ""
+        repo = ""
+        clientId = ""
+        clientSecret = ""
+      # Valine comment config (https://github.com/xCss/Valine)
+      [params.page.comment.valine]
+        enable = true
+        appId = "QGzwQXOqs5JOhN4RGPOkR2mR-MdYXbMMI"
+        appKey = "WBmoGyJtbqUswvfLh6L8iEBr"
+        placeholder = ""
+        avatar = "mp"
+        meta= ""
+        pageSize = 10
+        # automatically adapt the current theme i18n configuration when empty
+        lang = ""
+        visitor = true
+        recordIP = true
+        highlight = true
+        enableQQ = false
+        serverURLs = "https://valine.hugoloveit.com"
+        # emoji data file name, default is "google.yml"
+        # ["apple.yml", "google.yml", "facebook.yml", "twitter.yml"]
+        # located in "themes/LoveIt/assets/lib/valine/emoji/" directory
+        # you can store your own data files in the same path under your project:
+        # "assets/lib/valine/emoji/"
+        emoji = ""
+      # Facebook comment config (https://developers.facebook.com/docs/plugins/comments)
+      [params.page.comment.facebook]
+        enable = false
+        width = "100%"
+        numPosts = 10
+        appId = ""
+        # automatically adapt the current theme i18n configuration when empty
+        languageCode = ""
+      # Telegram comments config (https://comments.app/)
+      [params.page.comment.telegram]
+        enable = false
+        siteID = ""
+        limit = 5
+        height = ""
+        color = ""
+        colorful = true
+        dislikes = false
+        outlined = false
+      # Commento comment config (https://commento.io/)
+      [params.page.comment.commento]
+        enable = false
+      # utterances comment config (https://utteranc.es/)
+      [params.page.comment.utterances]
+        enable = false
+        # owner/repo
+        repo = ""
+        issueTerm = "pathname"
+        label = ""
+        lightTheme = "github-light"
+        darkTheme = "github-dark"
+      # giscus comment config (https://giscus.app/)
+      [params.page.comment.giscus]
+        # You can refer to the official documentation of giscus to use the following configuration.
+        enable = false
+        repo = ""
+        repoId = ""
+        category = "Announcements"
+        categoryId = ""
+        # automatically adapt the current theme i18n configuration when empty
+        lang = ""
+        mapping = "pathname"
+        reactionsEnabled = "1"
+        emitMetadata = "0"
+        inputPosition = "bottom"
+        lazyLoading = false
+        lightTheme = "light"
+        darkTheme = "dark"
+      # Waline comment config (https://waline.js.org/)
+      [params.page.comment.waline]
+        enable = false
+        serverURL = "https://love-it-waline.vercel.app"
+        # automatically adapt the current theme i18n configuration when empty
+        lang = ""
+        emoji = ["https://unpkg.com/@waline/emojis@1.0.1/tw-emoji"]
+    # Third-party library config
+    [params.page.library]
+      [params.page.library.css]
+        # someCSS = "some.css"
+        # located in "assets/"
+        # someCSS = "https://cdn.example.com/some.css"
+      [params.page.library.js]
+        # someJavascript = "some.js"
+        # located in "assets/"
+        # someJavascript = "https://cdn.example.com/some.js"
+    # Page SEO config
+    [params.page.seo]
+      # image URL
+      images = []
+      # Publisher info
+      [params.page.seo.publisher]
+        name = "Sean Carroll"
+        logoUrl = "/images/profile_picture.png"
 
-  [params.about]
-  enable = true
-  title = "About Me"
-  image = "/images/sean_and_ali.png"
-  content = """
-  I am a computer engineer with a strong interest in software!  
-  I'm also interested in books, tv, film, and language learning, both computer and natural :)
+  # TypeIt config
+  [params.typeit]
+    # typing speed between each step (measured in milliseconds)
+    speed = 100
+    # blinking speed of the cursor (measured in milliseconds)
+    cursorSpeed = 1000
+    # character used for the cursor (HTML format is supported)
+    cursorChar = "|"
+    # cursor duration after typing finishing (measured in milliseconds, "-1" means unlimited)
+    duration = -1
 
-  ---   
-  """
+  # Site verification code for Google/Bing/Yandex/Pinterest/Baidu
+  [params.verification]
+    google = ""
+    bing = ""
+    yandex = ""
+    pinterest = ""
+    baidu = ""
 
-    [params.about.skills]
-    enable = true
-    title = "Some of the languages I've been working with recently:"
-    items = [ "C++11", "Python3", "Rust", "Haskell", "Deutsch (B2)"]
+  # Site SEO config
+  [params.seo]
+    # image URL
+    image = "/images/Apple-Devices-Preview.png"
+    # thumbnail URL
+    thumbnailUrl = "/images/screenshot.png"
 
-  [params.experience]
-  enable = true
+  # Analytics config
+  [params.analytics]
+    # Google Analytics
+    [params.analytics.google]
+      id = ""
+      # whether to respect the browser’s “do not track” setting
+      respectDoNotTrack = false
+    # Fathom Analytics
+    [params.analytics.fathom]
+      id = ""
+      # server url for your tracker if you're self hosting
+      server = ""
+    # Plausible Analytics
+    [params.analytics.plausible]
+      dataDomain = ""
+    # Yandex Metrica
+    [params.analytics.yandexMetrica]
+      id = ""
 
-    [[params.experience.items]]
-    job = "Member of Technical Staff"
-    company = "AMD"
-    companyUrl = "https://amd.com"
-    date = "Aug 2022 - present"
-    content = """
- - Leading case studies using variety of proprietary models at different levels of abstraction to balance the needs for rapid prototyping as well as accurately predicting bottlenecks and architectural inefficiencies, models written in C++11 and Python3  
- - Creating lightweight and flexible data collection library to enhance ability to quickly collect and collate data simulations using modern C++11 and Rust  
- - Building coprocessor module for proprietary performance modeling simulator in C++11 while extending and refactoring existing modules for greater reuse and reduction of technical debt  
- - Synthesizing and interpreting performance data for case study presentations to designers to forecast next generation of coprocessors using pandas, duckdb, and plotly Python libraries  
- - Two papers accepted to internal conference concerning increasing efficiency and efficacy of methods used in performance modeling  
-    """
+  # Cookie consent config
+  [params.cookieconsent]
+    enable = false
+    # text strings used for Cookie consent banner
+    [params.cookieconsent.content]
+      message = ""
+      dismiss = ""
+      link = ""
 
-    [[params.experience.items]]
-    job = "Algorithm Engineer"
-    company = "Red Point Positioning"
-    companyUrl = "https://www.redpointpositioning.com/"
-    date = "Jan 2022 - Aug 2022"
-    content = """
- - Reduced time to RTLS (Real-Time Location System) deployments through creation of newly designed GUI tool written in Python and leveraging pandas, numpy, and PyQt libraries
- - Visualized the health of our RTLS deployments through development of a data-driven dashboard written in Python and leveraging pandas, numpy, dask, and dash libraries
- - Achieved reuse of common utilities used by R&D team through creation of a Python package, including a submodule implementing an API client for interaction with live RTLS servers
- - Introduced automation and testing methodologies to reduce technical debt with the creation of a CI flow for three projects, including linting and testing stages
+  # CDN config for third-party library files
+  [params.cdn]
+    # CDN data file name, disabled by default
+    # ["jsdelivr.yml"]
+    # located in "themes/LoveIt/assets/data/cdn/" directory
+    # you can store your own data files in the same path under your project:
+    # "assets/data/cdn/"
+    data = "jsdelivr.yml"
 
-"""
+  # Compatibility config
+  [params.compatibility]
+    # whether to use Polyfill.io to be compatible with older browsers
+    polyfill = false
+    # whether to use object-fit-images to be compatible with older browsers
+    objectFit = false
 
-    [[params.experience.items]]
-    job = "Design Verification Engineer for Analog/Mixed Signal Group"
-    company = "Apple"
-    companyUrl = "https://apple.com"
-    date = "Aug 2021 - Jan 2022"
-    content = """
- - Verified firmware-based component using SystemVerilog Assertions
-"""
+# Markup related configuration in Hugo
+[markup]
+  # Syntax Highlighting (https://gohugo.io/content-management/syntax-highlighting)
+  [markup.highlight]
+    anchorLineNos = false
+    codeFences = true
+    guessSyntax = false
+    lineNos = false
+    lineNumbersInTable = true
+    noClasses = true
+  # Goldmark is from Hugo 0.60 the default library used for Markdown
+  [markup.goldmark]
+    [markup.goldmark.extensions]
+      definitionList = true
+      footnote = true
+      linkify = true
+      strikethrough = true
+      table = true
+      taskList = true
+      typographer = true
+    [markup.goldmark.renderer]
+      # whether to use HTML tags directly in the document
+      unsafe = true
+  # Table Of Contents settings
+  [markup.tableOfContents]
+    startLevel = 2
+    endLevel = 6
 
-    [[params.experience.items]]
-    job = "Computer Architect"
-    company = "Lightelligence"
-    companyUrl = "https://www.lightelligence.ai/"
-    date = "Mar 2020 - Aug 2021"
-    content = """
- - Wrote a proprietary microarchitectural simulator in modern C++ using event-driven and OO programming paradigms with a Python front end
- - Co-designed the final microarchitecture using a novel photonic network-on-chip of a linear algebra accelerator for ML workloads
- - Conducted interviews resulting in growing the architecture team from 1 to 4 members
-"""
-    job2 = "Design Verification Engineer"
-    date2 = "Nov 2019 - Mar 2020"
-    content2 = """
- - Promoted efficiency through increased abstraction and automation by writing an extensible Python framework to generate RTL, DV, and C-based driver collateral from industry standard SystemRDL
- - Bootstrapped gate level simulation (GLS) flow and solely responsible for all GLS verification of Lightelligence's first test chip
-"""
+# Sitemap config
+[sitemap]
+  changefreq = "weekly"
+  filename = "sitemap.xml"
+  priority = 0.5
 
-    [[params.experience.items]]
-    job = "Design Verification Engineer"
-    company = "Marvell - formerly Cavium"
-    companyUrl = "https://marvell.com"
-    date = "Sep 2017 - Nov 2019"
-    content = """
- - Executed block level verification of the virtual resource manager coprocessor with the focus on the scoreboard in SystemVerilog/UVM
- - Verified integration and function of distributed support-blocks in all SOC coprocessors at the full chip level by co-writing a simple OS framework and associated test suite in C and SystemVerilog
- - Reduced debug loop time by catching common syntax errors faster through contribution of new features to internal linting tool written in Python
- - Mentored college intern through successful delivery of a report aggregation tool eliminating manual effort to collate test reports
-"""
+# Permalinks config (https://gohugo.io/content-management/urls/#permalinks)
+[permalinks]
+  # posts = ":year/:month/:contentbasename"
+  posts = ":contentbasename"
 
-  [params.education]
-  enable = true
-  index = false
+# Privacy config (https://gohugo.io/configuration/privacy/)
+[privacy]
+  # privacy of the Google Analytics (can also be configured in params.analytics.google)
+  [privacy.googleAnalytics]
+    # ...
+  [privacy.twitter]
+    # ...
+  [privacy.youtube]
+    # ...
 
-    [[params.education.items]]
-    title = "Master of Computer Science"
-    date = "2019 - 2021"
-    GPA = "4.0"
-    content = """"""
+# Options to make output .md files
+[mediaTypes]
+  [mediaTypes."text/plain"]
+    suffixes = ["md"]
 
-      [params.education.items.school]
-      name = "Georgia Institute of Technology"
-      url = "https://example.org"
+# Options to make output .md files
+[outputFormats.MarkDown]
+  mediaType = "text/plain"
+  isPlainText = true
+  isHTML = false
 
-    [[params.education.items]]
-    title = "Bachelor of Science in Electrical and Computer Engineering, Computer Science"
-    date = "2013 - 2017"
-    GPA = "3.871"
-    content = "Graduated Magna cum Laude"
+# Options to make hugo output files
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+  page = ["HTML", "MarkDown"]
+  section = ["HTML", "RSS"]
+  taxonomy = ["HTML", "RSS"]
 
-      [params.education.items.school]
-      name = "Cornell Univeristy"
-      url = "https://example.org"
-
-  [params.achievements]
-  enable = false
-
-  [params.projects]
-  enable = true
-
-    [[params.projects.items]]
-    title = "Personal Site"
-    content = "The GitHub repo for this site!"
-    image = "/images/favicons/android-chrome-512x512.png"
-    badges = [ "Hugo"]
-
-      [[params.projects.items.links]]
-      icon = "fab fa-github"
-      url = "https://github.com/seanwilliamcarroll/personal_site"
-
-    [[params.projects.items]]
-    title = "Advent of Code"
-    content = "My attempts at the Advent of Code Challenge"
-    image = "https://cottonbureau.com/image?path=sellers%2Foriginals%2F108879_advent-of-code_FSUd.png"
-    badges = ["C++", "Advent of Code"]
-
-      [[params.projects.items.links]]
-      icon = "fab fa-github"
-      url = "https://github.com/seanwilliamcarroll/aoc"
-
-  [params.contact]
-  enable = true
-  content = ""
-  btnName = "Mail me"
-  btnLink = "mailto:seanwilliamcarroll+personal_site@gmail.com"
-
-[params.footer.recentPosts]
-path = "posts"
-count = 3
-title = "Recent Posts"
-enable = true
-disableFeaturedImage = false
-
-[params.footer.socialNetworks]
-github = "https://github.com/seanwilliamcarroll"
-linkedin = "https://linkedin.com/in/seanwilliamcarroll"
-
-  [params.listPages]
-  disableFeaturedImage = false
-
-  [params.singlePages]
-  socialShare = true
-
-    [params.singlePages.readTime]
-    enable = true
-    content = "min read"
-
-    [params.singlePages.scrollprogress]
-    enable = true
-
-    [params.singlePages.tags]
-    openInNewTab = true
-
-  [params.terms]
-  read = "Read"
-  toc = "Table Of Contents"
-  copyright = "All rights reserved"
-  pageNotFound = "Page not found"
-  emailText = "Check out this site"
-
-  [params.datesFormat]
-  article = "Jan 2, 2006"
-  articleList = "Jan 2, 2006"
-  articleRecent = "Jan 2, 2006"
+# Multilingual
+[languages]
+  [languages.en]
+    weight = 1
+    languageCode = "en"
+    languageName = "English"
+    hasCJKLanguage = false
+    copyright = "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License."
+    [languages.en.menu]
+      [[languages.en.menu.main]]
+        weight = 1
+        identifier = "posts"
+        pre = ""
+        post = ""
+        name = "Posts"
+        url = "/posts/"
+        title = ""
+      [[languages.en.menu.main]]
+        weight = 2
+        identifier = "resume"
+        pre = ""
+        post = ""
+        name = "Resume"
+        url = "/documents/resume.pdf"
+        title = "Sean William Carroll Resume"
+      # [[languages.en.menu.main]]
+      #   weight = 3
+      #   identifier = "categories"
+      #   pre = ""
+      #   post = ""
+      #   name = "Categories"
+      #   url = "/categories/"
+      #   title = ""
+      # [[languages.en.menu.main]]
+      #   weight = 4
+      #   identifier = "documentation"
+      #   pre = ""
+      #   post = ""
+      #   name = "Docs"
+      #   url = "/categories/documentation/"
+      #   title = ""
+      [[languages.en.menu.main]]
+        weight = 5
+        identifier = "about"
+        pre = ""
+        post = ""
+        name = "About"
+        url = "/about/"
+        title = ""
+      [[languages.en.menu.main]]
+        weight = 6
+        identifier = "github"
+        pre = "<i class='fab fa-github fa-fw' aria-hidden='true'></i>"
+        post = ""
+        name = ""
+        url = "https://github.com/seanwilliamcarroll"
+        title = "GitHub"
+    [languages.en.params]
+      [languages.en.params.home]
+        rss = 10
+        [languages.en.params.home.profile]
+          enable = true
+          gravatarEmail = ""
+          avatarURL = "/images/profile_picture.png"
+          title = "Sean William Carroll"
+          subtitle = "Welcome to my personal site!"
+          typeit = false
+          social = true
+          disclaimer = ""
+      [languages.en.params.social]
+        GitHub = "seanwilliamcarroll"
+        [languages.en.params.social.LinkedIn]
+          id = "in/seanwilliamcarroll"
+          prefix = "https://www.linkedin.com/"
