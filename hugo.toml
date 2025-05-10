@@ -202,13 +202,23 @@ url = "https://github.com/seanwilliamcarroll"
 
     [[params.projects.items]]
     title = "Personal Site"
-    content = "The GitHub repo for this site!."
+    content = "The GitHub repo for this site!"
     image = "/images/favicons/android-chrome-512x512.png"
     badges = [ "Hugo"]
 
       [[params.projects.items.links]]
       icon = "fab fa-github"
       url = "https://github.com/seanwilliamcarroll/personal_site"
+
+    [[params.projects.items]]
+    title = "Advent of Code"
+    content = "My attempts at the Advent of Code Challenge"
+    image = "https://cottonbureau.com/image?path=sellers%2Foriginals%2F108879_advent-of-code_FSUd.png"
+    badges = ["C++", "Advent of Code"]
+
+      [[params.projects.items.links]]
+      icon = "fab fa-github"
+      url = "https://github.com/seanwilliamcarroll/aoc"
 
   [params.contact]
   enable = true
