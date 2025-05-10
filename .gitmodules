@@ -3,4 +3,4 @@
 	url = https://github.com/seanwilliamcarroll/hugo-profile
 [submodule "themes/LoveIt"]
 	path = themes/LoveIt
-	url = git@github.com:dillonzq/LoveIt.git
+	url = https://github.com.com/dillonzq/LoveIt.git
