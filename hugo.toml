@@ -153,28 +153,6 @@ ignoreErrors = ["error-remote-getjson", "error-missing-instagram-accesstoken"]
     # Windows v8-11 tile color
     tileColor = "#da532c"
 
-  # Search config
-  [params.search]
-    enable = true
-    # type of search engine ["lunr", "algolia"]
-    type = "algolia"
-    # max index length of the chunked content
-    contentLength = 4000
-    # placeholder of the search bar
-    placeholder = ""
-    # max number of results length
-    maxResultLength = 10
-    # snippet length of the result
-    snippetLength = 30
-    # HTML tag name of the highlight part in results
-    highlightTag = "em"
-    # whether to use the absolute URL based on the baseURL in search index
-    absoluteURL = false
-    [params.search.algolia]
-      index = ""
-      appID = ""
-      searchKey = ""
-
   # Home page config
   [params.home]
     # amount of RSS pages
@@ -519,9 +497,9 @@ ignoreErrors = ["error-remote-getjson", "error-missing-instagram-accesstoken"]
   [params.analytics]
     # Google Analytics
     [params.analytics.google]
-      id = ""
+      id = "G-Q68J475RQW"
       # whether to respect the browser’s “do not track” setting
-      respectDoNotTrack = false
+      respectDoNotTrack = true
     # Fathom Analytics
     [params.analytics.fathom]
       id = ""
