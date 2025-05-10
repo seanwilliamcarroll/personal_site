@@ -10,3 +10,4 @@ Hallo, mein Name ist Sean Carroll und ich lerne gern Deutsch. Ich habe 2022 ange
 
 
 Hi, my name is Sean Carroll and I like learning German. I started in 2022, before I flew to Germany for a vacation. Since I returned home, I learn a little bit more every day. Primarily I read the news and murder mysteries. Bye!
+
