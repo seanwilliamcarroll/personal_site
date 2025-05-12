@@ -628,8 +628,8 @@ ignoreErrors = ["error-remote-getjson", "error-missing-instagram-accesstoken"]
         pre = ""
         post = ""
         name = "Resume"
-        url = "/documents/resume.pdf"
-        title = "Sean William Carroll Resume"
+        url = "/resume/"
+        title = ""
       [[languages.en.menu.main]]
         weight = 3
         identifier = "projects"
