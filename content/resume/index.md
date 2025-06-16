@@ -78,3 +78,12 @@ seanwilliamcarroll@gmail.com
 - Cum. GPA: 3.871 (Magna Cum Laude)
   - Dean's List (All Semesters)
 - Vector Completed in Systems/Databases (OS Track)
+
+# Certifications
+
+## [Goethe-Zertifikat B2](https://www.goethe.de/ins/us/en/spr/prf/gzb2.cfm)
+
+### Deutsch (German at [B2 CEFR Level](https://en.wikipedia.org/wiki/Common_European_Framework_of_Reference_for_Languages))
+- June 2025
+- Hören, Sprechen, Schreiben (sehr gut)
+- Lesen (gut)
