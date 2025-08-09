@@ -10,9 +10,10 @@ seanwilliamcarroll@gmail.com
 # Current Position
 
 ## [AMD](https://www.amd.com/)
-### MTS Silicon Design Engineer | Aug 2022 - Present
-- Hybrid
 - Boxborough, MA 
+- Hybrid
+### SMTS Silicon Design Engineer | Jul 2025 - Present
+### MTS Silicon Design Engineer | Aug 2022 - Jul 2025
 - Leading case studies using variety of proprietary models at different levels of abstraction to balance the needs for rapid prototyping as well as accurately predicting bottlenecks and architectural inefficiencies, models written in C++11 and Python3
 - Creating lightweight and flexible data collection library to enhance ability to quickly collect and collate data simulations using modern C++11 and Rust
 - Building coprocessor module for proprietary performance modeling simulator in C++11 while extending and refactoring existing modules for greater reuse and reduction of technical debt
