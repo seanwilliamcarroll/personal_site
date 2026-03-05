@@ -22,7 +22,7 @@ const {
   author = SITE.author,
   profile = SITE.profile,
   description = SITE.desc,
-  ogImage = SITE.ogImage ? `/${SITE.ogImage}` : "/og.png",
+  ogImage = "/og.png",
   canonicalURL = new URL(Astro.url.pathname, Astro.url),
   pubDatetime,
   modDatetime,
@@ -139,7 +139,7 @@ const structuredData = {
     }
 
     <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q68J475RQW"></script>
+    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-Q68J475RQW"></script>
     <script is:inline>
       if (!navigator.doNotTrack || navigator.doNotTrack !== "1") {
         window.dataLayer = window.dataLayer || [];
