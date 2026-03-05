@@ -51,13 +51,26 @@ printf "\n"
 EOF
 
 cat > .git/hooks/pre-push << 'EOF'
-#!/bin/sh
-echo "Running full build..."
+#!/bin/bash
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+RESET='\033[0m'
+
+section() { printf "\n${BOLD}${CYAN}▶ %s${RESET}\n" "$1"; }
+pass()    { printf "  ${GREEN}✓${RESET} %s\n" "$1"; }
+fail()    { printf "  ${RED}✗${RESET} %s\n" "$1"; }
+
+section "Production build"
 npm run build
 if [ $? -ne 0 ]; then
-  echo "Build failed. Fix errors before pushing."
+  fail "Build failed — fix errors before pushing"
+  printf "\n"
   exit 1
 fi
+pass "Build succeeded"
+printf "\n"
 EOF
 
 chmod +x .git/hooks/pre-commit .git/hooks/pre-push
