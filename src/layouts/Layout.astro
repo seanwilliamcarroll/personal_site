@@ -139,11 +139,17 @@ const structuredData = {
     }
 
     <!-- Google Analytics -->
-    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-Q68J475RQW"></script>
+    <script
+      is:inline
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-Q68J475RQW"></script>
     <script is:inline>
       if (!navigator.doNotTrack || navigator.doNotTrack !== "1") {
         window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
+        function gtag() {
+          // eslint-disable-next-line prefer-rest-params
+          dataLayer.push(arguments);
+        }
         gtag("js", new Date());
         gtag("config", "G-Q68J475RQW");
       }
