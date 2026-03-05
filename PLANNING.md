@@ -76,9 +76,3 @@ Static site page
 
 ---
 
-## Quick Fixes (Hugo config)
-
-- [ ] Fix `baseURL` — still set to `https://example.org/`
-- [ ] Fix `description` in `[params]` — still says "Hugo theme - LoveIt"
-- [ ] Trim `hugo.toml` — most of the 680 lines are unused defaults
-- [ ] Flesh out `content/about/index.md` — currently just a shrug emoji
