@@ -1,6 +1,6 @@
 ---
 title: "Building a Sampling Profiler with Claude"
-pubDatetime: 2026-03-11T12:00:00-05:00
+pubDatetime: 2026-03-11T08:00:00-05:00
 description: "How I built a ptrace-based sampling profiler for Linux/AArch64 — what I wrote, what Claude wrote, and where it helped and didn't."
 tags:
   - projects
