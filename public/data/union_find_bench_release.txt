@@ -1,0 +1,62 @@
+Unable to determine clock rate from sysctl: hw.cpufrequency: No such file or directory
+This does not affect benchmark measurements, only the metadata output.
+***WARNING*** Failed to set thread affinity. Estimated CPU frequency may be incorrect.
+2026-03-12T23:01:14-04:00
+Running ./build-release/compiler_systems/src/union_find_bench
+Run on (10 X 24 MHz CPU s)
+CPU Caches:
+  L1 Data 64 KiB
+  L1 Instruction 128 KiB
+  L2 Unified 4096 KiB (x10)
+Load Average: 1.99, 2.06, 2.26
+--------------------------------------------------------------------------------------------------
+Benchmark                                                        Time             CPU   Iterations
+--------------------------------------------------------------------------------------------------
+BM_FindAfterAdversarialChain<UF_None>/1024                    1283 ns         1283 ns       550444
+BM_FindAfterAdversarialChain<UF_None>/4096                    2560 ns         2564 ns       264417
+BM_FindAfterAdversarialChain<UF_None>/32768                  12573 ns        12453 ns        55756
+BM_FindAfterAdversarialChain<UF_None>/262144                 82653 ns        82647 ns         8924
+BM_FindAfterAdversarialChain<UF_RankOnly>/1024                 424 ns          426 ns      1639152
+BM_FindAfterAdversarialChain<UF_RankOnly>/4096                 434 ns          436 ns      1619774
+BM_FindAfterAdversarialChain<UF_RankOnly>/32768               1119 ns         1093 ns       662321
+BM_FindAfterAdversarialChain<UF_RankOnly>/262144              1152 ns         1146 ns       618823
+BM_FindAfterAdversarialChain<UF_CompressionOnly>/1024         2507 ns         2509 ns       279452
+BM_FindAfterAdversarialChain<UF_CompressionOnly>/4096         3618 ns         3619 ns       211158
+BM_FindAfterAdversarialChain<UF_CompressionOnly>/32768       24306 ns        24308 ns        28450
+BM_FindAfterAdversarialChain<UF_CompressionOnly>/262144     146132 ns       146118 ns         4844
+BM_FindAfterAdversarialChain<UF_Both>/1024                     422 ns          424 ns      1631808
+BM_FindAfterAdversarialChain<UF_Both>/4096                     434 ns          437 ns      1610128
+BM_FindAfterAdversarialChain<UF_Both>/32768                   1059 ns         1057 ns       668571
+BM_FindAfterAdversarialChain<UF_Both>/262144                  1187 ns         1171 ns       615607
+BM_RepeatedFindAfterChain<UF_None>/1024                        267 ns          267 ns      2626188
+BM_RepeatedFindAfterChain<UF_None>/4096                       1030 ns         1029 ns       680795
+BM_RepeatedFindAfterChain<UF_None>/32768                      8502 ns         8459 ns        84987
+BM_RepeatedFindAfterChain<UF_None>/262144                    67346 ns        67081 ns        10551
+BM_RepeatedFindAfterChain<UF_RankOnly>/1024                  0.249 ns        0.249 ns   2817411604
+BM_RepeatedFindAfterChain<UF_RankOnly>/4096                  0.248 ns        0.248 ns   2821602186
+BM_RepeatedFindAfterChain<UF_RankOnly>/32768                 0.248 ns        0.248 ns   2662670126
+BM_RepeatedFindAfterChain<UF_RankOnly>/262144                0.248 ns        0.248 ns   2829105841
+BM_RepeatedFindAfterChain<UF_CompressionOnly>/1024           0.534 ns        0.534 ns    941847636
+BM_RepeatedFindAfterChain<UF_CompressionOnly>/4096           0.496 ns        0.496 ns   1132631102
+BM_RepeatedFindAfterChain<UF_CompressionOnly>/32768          0.584 ns        0.584 ns   1000000000
+BM_RepeatedFindAfterChain<UF_CompressionOnly>/262144         0.537 ns        0.537 ns   1412597545
+BM_RepeatedFindAfterChain<UF_Both>/1024                      0.403 ns        0.403 ns   1455791764
+BM_RepeatedFindAfterChain<UF_Both>/4096                      0.460 ns        0.460 ns   1879820397
+BM_RepeatedFindAfterChain<UF_Both>/32768                     0.372 ns        0.372 ns   1819363223
+BM_RepeatedFindAfterChain<UF_Both>/262144                    0.382 ns        0.382 ns   1665243280
+BM_RandomUnitesAndFinds<UF_None>/1024                         6375 ns         6375 ns       109885
+BM_RandomUnitesAndFinds<UF_None>/4096                        29997 ns        29941 ns        23600
+BM_RandomUnitesAndFinds<UF_None>/32768                      247872 ns       247867 ns         2847
+BM_RandomUnitesAndFinds<UF_None>/262144                    1960992 ns      1960944 ns          354
+BM_RandomUnitesAndFinds<UF_RankOnly>/1024                     2310 ns         2310 ns       304148
+BM_RandomUnitesAndFinds<UF_RankOnly>/4096                     9600 ns         9599 ns        73349
+BM_RandomUnitesAndFinds<UF_RankOnly>/32768                   78816 ns        78814 ns         8855
+BM_RandomUnitesAndFinds<UF_RankOnly>/262144                 622050 ns       622021 ns         1131
+BM_RandomUnitesAndFinds<UF_CompressionOnly>/1024              2090 ns         2086 ns       339984
+BM_RandomUnitesAndFinds<UF_CompressionOnly>/4096              7818 ns         7818 ns        89079
+BM_RandomUnitesAndFinds<UF_CompressionOnly>/32768            61120 ns        61118 ns        11457
+BM_RandomUnitesAndFinds<UF_CompressionOnly>/262144          470853 ns       470845 ns         1486
+BM_RandomUnitesAndFinds<UF_Both>/1024                         2244 ns         2244 ns       311117
+BM_RandomUnitesAndFinds<UF_Both>/4096                         8607 ns         8607 ns        81714
+BM_RandomUnitesAndFinds<UF_Both>/32768                       67926 ns        67875 ns        10237
+BM_RandomUnitesAndFinds<UF_Both>/262144                     526736 ns       526726 ns         1344

@@ -77,3 +77,16 @@ Container needs a small wrapper to:
 
 ---
 
+## Idea: Reusable Chart Components (MDX)
+
+Blog posts with benchmark data (Union-Find, Trie, potentially more) currently use inline `<script>` + Chart.js for graphs. If this pattern recurs, consider:
+
+- Install `@astrojs/mdx` and convert chart-heavy posts to `.mdx`
+- Create a reusable `<BenchmarkChart>` Astro component that takes structured data and renders a chart
+- Could standardize on Chart.js or Observable Plot (already planned for crossword stats)
+- Would keep markdown cleaner and make chart styling consistent across posts
+
+Not worth doing until there are 3+ posts with charts.
+
+---
+

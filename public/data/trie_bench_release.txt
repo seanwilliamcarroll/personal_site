@@ -1,0 +1,64 @@
+Unable to determine clock rate from sysctl: hw.cpufrequency: No such file or directory
+This does not affect benchmark measurements, only the metadata output.
+***WARNING*** Failed to set thread affinity. Estimated CPU frequency may be incorrect.
+2026-03-12T23:10:25-04:00
+Running ./build-release/compiler_systems/src/trie_bench
+Run on (10 X 24 MHz CPU s)
+CPU Caches:
+  L1 Data 64 KiB
+  L1 Instruction 128 KiB
+  L2 Unified 4096 KiB (x10)
+Load Average: 2.91, 2.58, 2.40
+---------------------------------------------------------------------------------
+Benchmark                                       Time             CPU   Iterations
+---------------------------------------------------------------------------------
+BM_InsertDense<ArenaTrie>/256               19204 ns        19189 ns        36345
+BM_InsertDense<ArenaTrie>/512               37472 ns        37351 ns        19422
+BM_InsertDense<ArenaTrie>/4096             242688 ns       242508 ns         2889
+BM_InsertDense<ArenaTrie>/32768           1627063 ns      1622037 ns          427
+BM_InsertDense<ArenaTrie>/65536           3133817 ns      3132860 ns          200
+BM_InsertSparse<ArenaTrie>/256              21267 ns        21266 ns        33043
+BM_InsertSparse<ArenaTrie>/512              44285 ns        44284 ns        15887
+BM_InsertSparse<ArenaTrie>/4096            303183 ns       303178 ns         2320
+BM_InsertSparse<ArenaTrie>/32768          2336517 ns      2336436 ns          298
+BM_InsertSparse<ArenaTrie>/65536          4702718 ns      4702584 ns          149
+BM_SearchHitDense<ArenaTrie>/256             1039 ns         1036 ns       634742
+BM_SearchHitDense<ArenaTrie>/512             2228 ns         2228 ns       307407
+BM_SearchHitDense<ArenaTrie>/4096           20225 ns        20075 ns        36322
+BM_SearchHitDense<ArenaTrie>/32768         194926 ns       194918 ns         3460
+BM_SearchHitDense<ArenaTrie>/65536        1056356 ns      1055912 ns          679
+BM_SearchMiss<ArenaTrie>/256                 84.3 ns         84.3 ns      8304268
+BM_SearchMiss<ArenaTrie>/512                  157 ns          157 ns      4713741
+BM_SearchMiss<ArenaTrie>/4096                1255 ns         1255 ns       650304
+BM_SearchMiss<ArenaTrie>/32768              10268 ns        10193 ns        70107
+BM_SearchMiss<ArenaTrie>/65536              19992 ns        19987 ns        35031
+BM_InsertDense<PtrTrie>/256                 43975 ns        43974 ns        15939
+BM_InsertDense<PtrTrie>/512                 83085 ns        83082 ns         8323
+BM_InsertDense<PtrTrie>/4096               542165 ns       542155 ns         1288
+BM_InsertDense<PtrTrie>/32768             3223049 ns      3222946 ns          205
+BM_InsertDense<PtrTrie>/65536            12110689 ns     12110267 ns           60
+BM_InsertSparse<PtrTrie>/256                50721 ns        50718 ns        13716
+BM_InsertSparse<PtrTrie>/512               101558 ns       101533 ns         6847
+BM_InsertSparse<PtrTrie>/4096              676902 ns       676888 ns         1023
+BM_InsertSparse<PtrTrie>/32768            7624984 ns      7624750 ns          100
+BM_InsertSparse<PtrTrie>/65536           19847413 ns     19846806 ns           36
+BM_SearchHitDense<PtrTrie>/256               1111 ns         1107 ns       726518
+BM_SearchHitDense<PtrTrie>/512               2263 ns         2263 ns       320050
+BM_SearchHitDense<PtrTrie>/4096             18791 ns        18791 ns        35629
+BM_SearchHitDense<PtrTrie>/32768           205003 ns       204996 ns         3678
+BM_SearchHitDense<PtrTrie>/65536           993337 ns       993295 ns          731
+BM_SearchMiss<PtrTrie>/256                   77.1 ns         76.7 ns      9229836
+BM_SearchMiss<PtrTrie>/512                    145 ns          145 ns      4814968
+BM_SearchMiss<PtrTrie>/4096                  1075 ns         1075 ns       657006
+BM_SearchMiss<PtrTrie>/32768                 8646 ns         8646 ns        82827
+BM_SearchMiss<PtrTrie>/65536                17168 ns        17167 ns        41413
+BM_GetWordsWithPrefix<ArenaTrie>/256         72.9 ns         72.8 ns      9539514
+BM_GetWordsWithPrefix<ArenaTrie>/512         72.8 ns         72.7 ns      8143986
+BM_GetWordsWithPrefix<ArenaTrie>/4096         317 ns          317 ns      2165038
+BM_GetWordsWithPrefix<ArenaTrie>/32768       1263 ns         1262 ns       543609
+BM_GetWordsWithPrefix<ArenaTrie>/65536       2133 ns         2122 ns       337301
+BM_GetWordsWithPrefix<PtrTrie>/256           73.2 ns         73.2 ns      9280866
+BM_GetWordsWithPrefix<PtrTrie>/512           73.5 ns         73.5 ns      8209218
+BM_GetWordsWithPrefix<PtrTrie>/4096           314 ns          314 ns      2160140
+BM_GetWordsWithPrefix<PtrTrie>/32768         1240 ns         1240 ns       565446
+BM_GetWordsWithPrefix<PtrTrie>/65536         2067 ns         2067 ns       333914
