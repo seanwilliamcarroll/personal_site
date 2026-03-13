@@ -61,6 +61,10 @@ Raw benchmark data: [release](/data/trie_bench_release.txt), [debug](/data/trie_
 | Arena Sparse | 21μs | 303μs | 4.7ms  |
 | Ptr Sparse   | 51μs | 677μs | 19.8ms |
 
+<div style="max-width: 600px; margin: 1.5em auto;">
+<canvas data-chart='{"title":"Insert Performance","yLabel":"Time (μs)","log":true,"labels":["256","4K","64K"],"datasets":[{"label":"Arena Dense","color":"#3b82f6","data":[19.2,243,3134]},{"label":"Ptr Dense","color":"#ef4444","data":[44,542,12111]},{"label":"Arena Sparse","color":"#93c5fd","data":[21.3,303,4703]},{"label":"Ptr Sparse","color":"#fca5a5","data":[51,677,19847]}]}'></canvas>
+</div>
+
 Arena is ~4x faster across the board. Each PtrTrie insert does a separate heap allocation per new node. ArenaTrie pushes into a contiguous vector — fewer allocations and better locality during construction. The compiler can inline `make_unique`, eliminate overhead, generate tight code — but it can't turn a thousand separate heap allocations into a single vector push.
 
 Sparse words are slower than dense in both implementations — more unique prefixes means more nodes to create. But the arena/ptr ratio stays consistent.
@@ -77,6 +81,10 @@ Sparse words are slower than dense in both implementations — more unique prefi
 | Ptr Hit    | 1.1μs | 19μs  | 993μs |
 | Arena Miss | 84ns  | 1.3μs | 20μs  |
 | Ptr Miss   | 77ns  | 1.1μs | 17μs  |
+
+<div style="max-width: 600px; margin: 1.5em auto;">
+<canvas data-chart='{"title":"Search Performance","yLabel":"Time (μs)","log":true,"labels":["256","4K","64K"],"datasets":[{"label":"Arena Hit","color":"#3b82f6","data":[1.04,20,1056]},{"label":"Ptr Hit","color":"#ef4444","data":[1.11,18.8,993]},{"label":"Arena Miss","color":"#93c5fd","data":[0.084,1.26,20]},{"label":"Ptr Miss","color":"#fca5a5","data":[0.077,1.08,17.2]}]}'></canvas>
+</div>
 
 Nearly identical. PtrTrie is actually marginally faster on misses.
 

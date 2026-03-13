@@ -283,3 +283,64 @@ const nextPost =
     window.scrollTo({ left: 0, top: 0, behavior: "instant" })
   );
 </script>
+
+<script is:inline data-astro-rerun>
+  (function () {
+    const canvases = document.querySelectorAll("canvas[data-chart]");
+    if (!canvases.length) return;
+
+    function initCharts() {
+      const style = getComputedStyle(document.documentElement);
+      const textColor = style.getPropertyValue("--foreground").trim();
+      const gridColor = textColor + "22";
+
+      canvases.forEach(function (canvas) {
+        const cfg = JSON.parse(canvas.getAttribute("data-chart"));
+        const yScale = {
+          title: { display: true, text: cfg.yLabel, color: textColor },
+          ticks: { color: textColor },
+          grid: { color: gridColor },
+        };
+        if (cfg.log) yScale.type = "logarithmic";
+
+        new Chart(canvas, {
+          type: "bar",
+          data: {
+            labels: cfg.labels,
+            datasets: cfg.datasets.map(function (ds) {
+              return {
+                label: ds.label,
+                backgroundColor: ds.color,
+                data: ds.data,
+              };
+            }),
+          },
+          options: {
+            responsive: true,
+            scales: {
+              x: { ticks: { color: textColor }, grid: { color: gridColor } },
+              y: yScale,
+            },
+            plugins: {
+              legend: {
+                labels: { color: textColor, font: { size: 13 } },
+              },
+              title: {
+                display: true,
+                text: cfg.title,
+                color: textColor,
+                font: { size: 15 },
+              },
+            },
+          },
+        });
+      });
+    }
+
+    // Dynamically load Chart.js, then initialize
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/chart.js@4";
+    script.onload = initCharts;
+    document.head.appendChild(script);
+  })();
+</script>
