@@ -64,6 +64,9 @@ Raw benchmark data: [release](/data/trie_bench_release.txt), [debug](/data/trie_
 <div style="max-width: 600px; margin: 1.5em auto;">
 <canvas data-chart='{"title":"Insert Performance","yLabel":"Time (μs)","log":true,"labels":["256","4K","64K"],"datasets":[{"label":"Arena Dense","color":"#3b82f6","data":[19.2,243,3134]},{"label":"Ptr Dense","color":"#ef4444","data":[44,542,12111]},{"label":"Arena Sparse","color":"#93c5fd","data":[21.3,303,4703]},{"label":"Ptr Sparse","color":"#fca5a5","data":[51,677,19847]}]}'></canvas>
 </div>
+<div style="max-width: 600px; margin: 1.5em auto;">
+<canvas data-chart='{"title":"Insert: Arena Speedup vs Ptr","yLabel":"Speedup (×)","labels":["256","4K","64K"],"datasets":[{"label":"Dense","color":"#3b82f6","data":[2.29,2.23,3.87]},{"label":"Sparse","color":"#93c5fd","data":[2.39,2.23,4.22]}]}'></canvas>
+</div>
 
 Arena is ~4x faster across the board. Each PtrTrie insert does a separate heap allocation per new node. ArenaTrie pushes into a contiguous vector — fewer allocations and better locality during construction. The compiler can inline `make_unique`, eliminate overhead, generate tight code — but it can't turn a thousand separate heap allocations into a single vector push.
 
@@ -84,6 +87,9 @@ Sparse words are slower than dense in both implementations — more unique prefi
 
 <div style="max-width: 600px; margin: 1.5em auto;">
 <canvas data-chart='{"title":"Search Performance","yLabel":"Time (μs)","log":true,"labels":["256","4K","64K"],"datasets":[{"label":"Arena Hit","color":"#3b82f6","data":[1.04,20,1056]},{"label":"Ptr Hit","color":"#ef4444","data":[1.11,18.8,993]},{"label":"Arena Miss","color":"#93c5fd","data":[0.084,1.26,20]},{"label":"Ptr Miss","color":"#fca5a5","data":[0.077,1.08,17.2]}]}'></canvas>
+</div>
+<div style="max-width: 600px; margin: 1.5em auto;">
+<canvas data-chart='{"title":"Search: Arena Speedup vs Ptr","yLabel":"Speedup (×)","labels":["256","4K","64K"],"datasets":[{"label":"Hit","color":"#3b82f6","data":[1.07,0.94,0.94]},{"label":"Miss","color":"#93c5fd","data":[0.92,0.86,0.86]}]}'></canvas>
 </div>
 
 Nearly identical. PtrTrie is actually marginally faster on misses.

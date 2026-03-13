@@ -182,6 +182,9 @@ Build a chain via `unite(i, i-1)` for all `i`, creating maximum tree depth. Then
 <div style="max-width: 600px; margin: 1.5em auto;">
 <canvas data-chart='{"title":"Adversarial Chain: One Find","yLabel":"Time (μs)","log":true,"labels":["1K","32K","256K"],"datasets":[{"label":"None","color":"#ef4444","data":[1.283,12.5,82.65]},{"label":"Rank only","color":"#3b82f6","data":[0.424,1.1,1.15]},{"label":"Compression only","color":"#f59e0b","data":[2.507,24.3,146.1]},{"label":"Both","color":"#22c55e","data":[0.422,1.06,1.19]}]}'></canvas>
 </div>
+<div style="max-width: 600px; margin: 1.5em auto;">
+<canvas data-chart='{"title":"Adversarial Chain: Speedup vs No Optimization","yLabel":"Speedup (×)","log":true,"labels":["1K","32K","256K"],"datasets":[{"label":"Rank only","color":"#3b82f6","data":[3.03,11.4,71.9]},{"label":"Compression only","color":"#f59e0b","data":[0.51,0.51,0.57]},{"label":"Both","color":"#22c55e","data":[3.04,11.8,69.5]}]}'></canvas>
+</div>
 
 Rank dominates. It prevents the deep chain from forming in the first place, so the single find has almost nothing to walk. At 256K, rank keeps the find at ~1.2μs — effectively constant, barely changed from 32K.
 
@@ -200,6 +203,9 @@ Same adversarial chain, but call `find` once before timing to trigger compressio
 
 <div style="max-width: 600px; margin: 1.5em auto;">
 <canvas data-chart='{"title":"Repeated Find After Chain","yLabel":"Time (ns)","log":true,"labels":["1K","32K","256K"],"datasets":[{"label":"None","color":"#ef4444","data":[267,8500,67000]},{"label":"Rank only","color":"#3b82f6","data":[0.249,0.248,0.248]},{"label":"Compression only","color":"#f59e0b","data":[0.534,0.584,0.537]},{"label":"Both","color":"#22c55e","data":[0.403,0.372,0.382]}]}'></canvas>
+</div>
+<div style="max-width: 600px; margin: 1.5em auto;">
+<canvas data-chart='{"title":"Repeated Find: Speedup vs No Optimization","yLabel":"Speedup (×)","log":true,"labels":["1K","32K","256K"],"datasets":[{"label":"Rank only","color":"#3b82f6","data":[1072,34274,270161]},{"label":"Compression only","color":"#f59e0b","data":[500,14555,124721]},{"label":"Both","color":"#22c55e","data":[663,22849,175393]}]}'></canvas>
 </div>
 
 The most dramatic result in the whole suite. Without optimization, every find re-walks the full chain — time scales linearly with n. With either optimization, repeated finds are O(1) regardless of size.
@@ -220,7 +226,10 @@ Typical usage — not adversarial. Random unite patterns followed by random find
 | Both             | 2.2μs | 68μs  | 527μs |
 
 <div style="max-width: 600px; margin: 1.5em auto;">
-<canvas data-chart='{"title":"Random Workload: n Unites + n Finds","yLabel":"Time (μs)","log":true,"labels":["1K","32K","256K"],"datasets":[{"label":"None","color":"#ef4444","data":[6.375,248,1961]},{"label":"Rank only","color":"#3b82f6","data":[2.31,78.8,622]},{"label":"Compression only","color":"#f59e0b","data":[2.09,61.1,471]},{"label":"Both","color":"#22c55e","data":[0.422,67.9,527]}]}'></canvas>
+<canvas data-chart='{"title":"Random Workload: n Unites + n Finds","yLabel":"Time (μs)","log":true,"labels":["1K","32K","256K"],"datasets":[{"label":"None","color":"#ef4444","data":[6.375,248,1961]},{"label":"Rank only","color":"#3b82f6","data":[2.31,78.8,622]},{"label":"Compression only","color":"#f59e0b","data":[2.09,61.1,471]},{"label":"Both","color":"#22c55e","data":[2.24,67.9,527]}]}'></canvas>
+</div>
+<div style="max-width: 600px; margin: 1.5em auto;">
+<canvas data-chart='{"title":"Random Workload: Speedup vs No Optimization","yLabel":"Speedup (×)","labels":["1K","32K","256K"],"datasets":[{"label":"Rank only","color":"#3b82f6","data":[2.76,3.15,3.15]},{"label":"Compression only","color":"#f59e0b","data":[3.05,4.06,4.16]},{"label":"Both","color":"#22c55e","data":[2.85,3.65,3.72]}]}'></canvas>
 </div>
 
 Here the story flips: **compression beats rank.** Random unite order doesn't build worst-case chains, so rank has less to prevent. But compression still benefits from flattening paths that get walked repeatedly during the find phase.
