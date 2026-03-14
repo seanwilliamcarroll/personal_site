@@ -46,7 +46,7 @@ Same API, same traversal logic. Both implementations share a `find_last_node` he
 
 The benchmarks test two word distributions: **dense** (words share long prefixes, heavy overlap) and **sparse** (words spread across the alphabet, little sharing).
 
-Raw benchmark data: [release](/data/trie_bench_release.txt), [debug](/data/trie_bench_debug.txt)
+Source code: [seanwilliamcarroll/ds](https://github.com/seanwilliamcarroll/ds) — raw benchmark data: [release](/data/trie_bench_release.txt), [debug](/data/trie_bench_debug.txt)
 
 ---
 
