@@ -9,6 +9,8 @@ tags:
 draft: false
 ---
 
+**Update: The "arena" implementation below was not a true arena — it used `vector<unique_ptr<Node>>`, which still scatters nodes across the heap. The insert speedup was real, but the cache locality explanation was wrong. Leaving this post as-is for reference. See [Part 2](/posts/benchmarking-tries-part-2) for the corrected analysis with real arenas.**
+
 **TL;DR:** Implementing a trie led me into cache effects, `const_cast`, and what the compiler can and can't optimize away.
 
 ---
