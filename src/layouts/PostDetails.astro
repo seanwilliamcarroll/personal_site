@@ -303,22 +303,45 @@ const nextPost =
         };
         if (cfg.log) yScale.type = "logarithmic";
 
+        const chartType = cfg.type || "bar";
+
+        const xScale = {
+          ticks: { color: textColor },
+          grid: { color: gridColor },
+        };
+        if (cfg.xLog) xScale.type = "logarithmic";
+
+        const datasets = cfg.datasets.map(function (ds) {
+          if (chartType === "line") {
+            return {
+              label: ds.label,
+              borderColor: ds.color,
+              backgroundColor: ds.color,
+              pointBackgroundColor: ds.color,
+              data: ds.data,
+              fill: false,
+              tension: 0,
+              pointRadius: 4,
+              borderWidth: 2,
+            };
+          }
+          return {
+            label: ds.label,
+            backgroundColor: ds.color,
+            data: ds.data,
+          };
+        });
+
         new Chart(canvas, {
-          type: "bar",
+          type: chartType,
           data: {
             labels: cfg.labels,
-            datasets: cfg.datasets.map(function (ds) {
-              return {
-                label: ds.label,
-                backgroundColor: ds.color,
-                data: ds.data,
-              };
-            }),
+            datasets: datasets,
           },
           options: {
             responsive: true,
             scales: {
-              x: { ticks: { color: textColor }, grid: { color: gridColor } },
+              x: xScale,
               y: yScale,
             },
             plugins: {

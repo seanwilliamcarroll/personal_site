@@ -78,6 +78,19 @@ Then, after seeing how much the per-node layout affected cache behavior, I wante
 | Deque Sparse            | 13μs | 190μs | 2.8ms  |
 | Ptr Sparse              | 50μs | 672μs | 19.4ms |
 
+<div style="max-width: 600px; margin: 1.5em auto;">
+<canvas data-chart='{"title":"Insert Performance (Dense)","type":"line","yLabel":"Time (μs)","log":true,"xLog":true,"labels":[256,512,4096,32768,65536],"datasets":[{"label":"IndexArena","color":"#636EFA","data":[16.2,30.7,154,1510,3530]},{"label":"DataOriented","color":"#EF553B","data":[15.5,28.5,132,1330,3020]},{"label":"Deque","color":"#00CC96","data":[11.6,22.2,151,932,1810]},{"label":"PtrTrie","color":"#AB63FA","data":[44.2,83.2,544,3280,11500]}]}'></canvas>
+</div>
+<div style="max-width: 600px; margin: 1.5em auto;">
+<canvas data-chart='{"title":"Insert Speedup vs PtrTrie (Dense)","yLabel":"Speedup (×)","labels":["256","512","4K","32K","64K"],"datasets":[{"label":"PtrTrie (baseline)","color":"#AB63FA","data":[1,1,1,1,1]},{"label":"IndexArena","color":"#636EFA","data":[2.73,2.71,3.53,2.17,3.26]},{"label":"DataOriented","color":"#EF553B","data":[2.85,2.92,4.12,2.47,3.81]},{"label":"Deque","color":"#00CC96","data":[3.81,3.75,3.60,3.52,6.35]}]}'></canvas>
+</div>
+<div style="max-width: 600px; margin: 1.5em auto;">
+<canvas data-chart='{"title":"Insert Performance (Sparse)","type":"line","yLabel":"Time (μs)","log":true,"xLog":true,"labels":[256,512,4096,32768,65536],"datasets":[{"label":"IndexArena","color":"#636EFA","data":[17.5,34.0,232,1560,3890]},{"label":"DataOriented","color":"#EF553B","data":[16.1,30.5,220,1320,3290]},{"label":"Deque","color":"#00CC96","data":[13.0,27.6,190,1490,2830]},{"label":"PtrTrie","color":"#AB63FA","data":[49.7,101,672,7230,19400]}]}'></canvas>
+</div>
+<div style="max-width: 600px; margin: 1.5em auto;">
+<canvas data-chart='{"title":"Insert Speedup vs PtrTrie (Sparse)","yLabel":"Speedup (×)","labels":["256","512","4K","32K","64K"],"datasets":[{"label":"PtrTrie (baseline)","color":"#AB63FA","data":[1,1,1,1,1]},{"label":"IndexArena","color":"#636EFA","data":[2.84,2.97,2.90,4.63,4.99]},{"label":"DataOriented","color":"#EF553B","data":[3.09,3.31,3.05,5.48,5.90]},{"label":"Deque","color":"#00CC96","data":[3.82,3.66,3.54,4.85,6.86]}]}'></canvas>
+</div>
+
 All arenas beat PtrTrie convincingly — IndexArena by ~3.3x, DequeArena by ~6.4x at 64K dense. The surprise is that DequeArena is the fastest inserter, nearly twice as fast as IndexArena at 64K.
 
 Why? IndexArena's `vector<Node>` occasionally reallocates and copies the entire array when it grows. Each Node is 216 bytes[^1] so at 64K nodes that's ~13.5MB being copied on resize. DequeArena's `deque` never moves existing nodes — it just allocates a new chunk and updates its internal bookkeeping. The reallocation cost outweighs the locality benefit during construction.
@@ -96,6 +109,13 @@ This is a tradeoff the old post missed entirely, because the old "arena" wasn't 
 | DataOriented Hit     | 984ns | 23μs | 397μs |
 | Deque Hit            | 1.2μs | 21μs | 930μs |
 | Ptr Hit              | 1.1μs | 18μs | 878μs |
+
+<div style="max-width: 600px; margin: 1.5em auto;">
+<canvas data-chart='{"title":"Search Hit Performance (Dense)","type":"line","yLabel":"Time (μs)","log":true,"xLog":true,"labels":[256,512,4096,32768,65536],"datasets":[{"label":"IndexArena","color":"#636EFA","data":[0.912,2.73,23.3,207,580]},{"label":"DataOriented","color":"#EF553B","data":[0.984,2.52,23.4,190,397]},{"label":"Deque","color":"#00CC96","data":[1.23,2.70,20.7,219,930]},{"label":"PtrTrie","color":"#AB63FA","data":[1.07,2.19,18.0,197,878]}]}'></canvas>
+</div>
+<div style="max-width: 600px; margin: 1.5em auto;">
+<canvas data-chart='{"title":"Search Hit: Speedup vs PtrTrie (Dense)","yLabel":"Speedup (×)","labels":["256","512","4K","32K","64K"],"datasets":[{"label":"PtrTrie (baseline)","color":"#AB63FA","data":[1,1,1,1,1]},{"label":"IndexArena","color":"#636EFA","data":[1.17,0.80,0.77,0.95,1.51]},{"label":"DataOriented","color":"#EF553B","data":[1.09,0.87,0.77,1.04,2.21]},{"label":"Deque","color":"#00CC96","data":[0.87,0.81,0.87,0.90,0.94]}]}'></canvas>
+</div>
 
 This is the result the old post was looking for but couldn't find. At 64K words, IndexArena (sentinel) searches are 1.5x faster than PtrTrie, and DataOriented pushes that to 2.2x. The old post reported identical search times — because both implementations scattered nodes on the heap, there was no locality difference to measure.
 
@@ -118,6 +138,13 @@ At mid-range sizes where everything fits in cache, this per-iteration overhead d
 | Index Miss (sentinel) | 127ns | 2.0μs | 32μs |
 | Deque Miss            | 108ns | 1.7μs | 26μs |
 | Ptr Miss              | 77ns  | 1.1μs | 17μs |
+
+<div style="max-width: 600px; margin: 1.5em auto;">
+<canvas data-chart='{"title":"Search Miss Performance","type":"line","yLabel":"Time (μs)","log":true,"xLog":true,"labels":[256,512,4096,32768,65536],"datasets":[{"label":"IndexArena (sentinel)","color":"#636EFA","data":[0.127,0.249,1.97,15.6,31.6]},{"label":"Deque","color":"#00CC96","data":[0.108,0.210,1.66,13.2,26.4]},{"label":"PtrTrie","color":"#AB63FA","data":[0.0766,0.145,1.08,8.62,17.1]}]}'></canvas>
+</div>
+<div style="max-width: 600px; margin: 1.5em auto;">
+<canvas data-chart='{"title":"Search Miss: Speedup vs PtrTrie","yLabel":"Speedup (×)","labels":["256","512","4K","32K","64K"],"datasets":[{"label":"PtrTrie (baseline)","color":"#AB63FA","data":[1,1,1,1,1]},{"label":"IndexArena (sentinel)","color":"#636EFA","data":[0.60,0.58,0.55,0.55,0.54]},{"label":"Deque","color":"#00CC96","data":[0.71,0.69,0.65,0.65,0.65]}]}'></canvas>
+</div>
 
 Misses tell a different story: PtrTrie is fastest across all sizes. This makes sense — a miss on "zzzzzzz" in a trie of "a"-prefixed words fails at the root node, one array lookup and done. The benchmark repeats this n times on the same hot node. No traversal means no cache effects — just raw per-lookup overhead.
 
@@ -143,6 +170,13 @@ Search hits and inserts showed no meaningful difference — the `madd` multiply 
 | 32K  | 15.6μs   | 8.0μs     | 1.94x   |
 | 64K  | 31.6μs   | 16.0μs    | 1.98x   |
 
+<div style="max-width: 600px; margin: 1.5em auto;">
+<canvas data-chart='{"title":"Search Miss: Sentinel vs Zero-as-Null","type":"line","yLabel":"Time (μs)","log":true,"xLog":true,"labels":[256,512,4096,32768,65536],"datasets":[{"label":"Sentinel","color":"#636EFA","data":[0.127,0.249,1.97,15.6,31.6]},{"label":"Zero-null","color":"#EF553B","data":[0.0699,0.138,1.01,8.04,16.0]}]}'></canvas>
+</div>
+<div style="max-width: 600px; margin: 1.5em auto;">
+<canvas data-chart='{"title":"Zero-as-Null Speedup vs Sentinel","yLabel":"Speedup (×)","labels":["256","512","4K","32K","64K"],"datasets":[{"label":"Sentinel (baseline)","color":"#636EFA","data":[1,1,1,1,1]},{"label":"Zero-null","color":"#EF553B","data":[1.82,1.80,1.95,1.94,1.98]}]}'></canvas>
+</div>
+
 A consistent ~1.9x speedup across all sizes. That's much larger than a single instruction should account for — until you consider that the miss benchmark's hot path is literally: load one child index, compare to null, repeat. The null comparison _is_ the bottleneck, so `cbz` vs `cmn` + `b.eq` is the difference between one and two instructions on the critical path.
 
 In debug builds the effect vanishes (sentinel 1.77ms vs zero-null 1.80ms at 64K) — unoptimized function call overhead masks the instruction-level difference, same pattern we saw with search hits.
@@ -167,6 +201,13 @@ Comparing against IndexArenaZeroNull (same null strategy, same traversal logic �
 | 4K   | 24.9μs     | 23.4μs       | 1.07x     |
 | 32K  | 204μs      | 190μs        | 1.07x     |
 | 64K  | 582μs      | 397μs        | **1.47x** |
+
+<div style="max-width: 600px; margin: 1.5em auto;">
+<canvas data-chart='{"title":"Search Hit: IndexArena vs DataOriented","type":"line","yLabel":"Time (μs)","log":true,"xLog":true,"labels":[256,512,4096,32768,65536],"datasets":[{"label":"IndexArena (zero-null)","color":"#636EFA","data":[0.904,2.70,24.9,204,582]},{"label":"DataOriented","color":"#EF553B","data":[0.984,2.52,23.4,190,397]}]}'></canvas>
+</div>
+<div style="max-width: 600px; margin: 1.5em auto;">
+<canvas data-chart='{"title":"DataOriented Speedup vs IndexArena","yLabel":"Speedup (×)","labels":["256","512","4K","32K","64K"],"datasets":[{"label":"IndexArena (baseline)","color":"#636EFA","data":[1,1,1,1,1]},{"label":"DataOriented","color":"#EF553B","data":[0.92,1.07,1.06,1.07,1.47]}]}'></canvas>
+</div>
 
 A 1.47x improvement at 64K from removing 8 bytes per node. The total memory savings is modest — 13.0MB vs 13.5MB for the children arrays — but every cache line pulled in during traversal is now 100% useful data. No padding, no cold bools.
 
