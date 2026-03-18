@@ -60,7 +60,7 @@ This is a shortest-path problem in disguise. The answer is the maximum over all 
 
 ## My First Attempt: Accidentally Inventing SPFA
 
-My instinct was BFS. The wrinkle with weighted graphs is that the first time you visit a node isn't necessarily via the shortest path. My fix: if we later discover a shorter path to a node, re-enqueue it so its neighbors can be updated.
+My instinct was [BFS](https://en.wikipedia.org/wiki/Breadth-first_search). The wrinkle with weighted graphs is that the first time you visit a node isn't necessarily via the shortest path. My fix: if we later discover a shorter path to a node, re-enqueue it so its neighbors can be updated.
 
 ```cpp
 std::deque<SearchState> neighbor_queue{{.next_node = k, .cost_to_reach = 0}};
@@ -79,17 +79,17 @@ while (!neighbor_queue.empty()) {
 
 It works. It handles re-relaxation, terminates, and passes all the tests. I was fairly happy with it.
 
-Claude pointed out this algorithm has a name: **SPFA (Shortest Path Faster Algorithm)**. It's a known variant of Bellman-Ford using a queue instead of repeated full-graph sweeps. Correct for non-negative weights, but worst-case O(V·E) — nodes can be visited many times depending on input shape.
+Claude pointed out this algorithm has a name: **[SPFA (Shortest Path Faster Algorithm)](https://en.wikipedia.org/wiki/Shortest_Path_Faster_Algorithm)**. It's a known variant of [Bellman-Ford](https://en.wikipedia.org/wiki/Bellman%E2%80%93Ford_algorithm) using a queue instead of repeated full-graph sweeps. Correct for non-negative weights, but worst-case O(V·E) — nodes can be visited many times depending on input shape.
 
 The problem is that re-enqueue. On a dense graph, discovering a shorter path to node X means re-enqueuing all of X's neighbors — each of which might trigger further re-enqueues of _their_ neighbors. The cascade isn't bounded by anything except the structure of the graph. A node that sits at a hub with many incoming edges of varying weights can be re-enqueued once per improvement, and each re-enqueue fans out to all its neighbors.
 
-The right tool for non-negative weighted shortest paths is Dijkstra, which guarantees each node is settled exactly once. To implement Dijkstra, I needed a min-heap.
+The right tool for non-negative weighted shortest paths is [Dijkstra's algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm), which guarantees each node is settled exactly once. To implement Dijkstra, I needed a min-heap.
 
 ---
 
 ## A Necessary Detour: Building a Min-Heap
 
-I'd used `std::priority_queue` before but never understood the internals. Before implementing Dijkstra, I wanted to build one from scratch — a flat-array binary heap with `bubble_up` and `bubble_down`.
+I'd used `std::priority_queue` before but never understood the internals. Before implementing Dijkstra, I wanted to build one from scratch — a flat-array [binary heap](https://en.wikipedia.org/wiki/Binary_heap) with `bubble_up` and `bubble_down`.
 
 Claude wrote a 20-test suite covering edge cases (empty heap, duplicates, negative values, interleaved push/pop, and a `std::pair<int,int>` test simulating Dijkstra's `(distance, node)` usage). I implemented `MinHeap<T>` against those tests.
 
@@ -118,7 +118,7 @@ while (!search_frontier.empty()) {
 
 The **stale entry check** is the key line. When a shorter path to a node is found after it's already in the heap, the old entry stays — there's no "decrease-key." When we pop it later with a worse cost, we skip it. Without this, Dijkstra degrades toward SPFA — processing the same node multiple times. With it, each node is settled exactly once, giving O((V+E) log V).
 
-Implementing Dijkstra also cleaned up the SPFA code. My original SPFA tracked `prev_node` in every queue entry solely to look up edge weights from a separate `unordered_map<Edge, int>` — which required a custom `Edge` struct with a hash specialization. Moving to `(dest, weight)` pairs directly in the adjacency list — the same representation Dijkstra uses — eliminated the map, the struct, and the hash.
+Implementing Dijkstra also cleaned up the SPFA code. My original SPFA tracked `prev_node` in every queue entry solely to look up edge weights from a separate `unordered_map<Edge, int>` — which required a custom `Edge` struct with a hash specialization. Moving to `(dest, weight)` pairs directly in the [adjacency list](https://en.wikipedia.org/wiki/Adjacency_list) — the same representation Dijkstra uses — eliminated the map, the struct, and the hash.
 
 ---
 
