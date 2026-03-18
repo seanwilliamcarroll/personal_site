@@ -310,15 +310,24 @@ const nextPost =
           grid: { color: gridColor },
         };
         if (cfg.xLog) xScale.type = "logarithmic";
+        if (cfg.xLinear) xScale.type = "linear";
+
+        const useXY = cfg.xLinear || cfg.xLog;
 
         const datasets = cfg.datasets.map(function (ds) {
+          const data =
+            useXY && chartType === "line"
+              ? ds.data.map(function (y, i) {
+                  return { x: parseFloat(cfg.labels[i]), y: y };
+                })
+              : ds.data;
           if (chartType === "line") {
             return {
               label: ds.label,
               borderColor: ds.color,
               backgroundColor: ds.color,
               pointBackgroundColor: ds.color,
-              data: ds.data,
+              data: data,
               fill: false,
               tension: 0,
               pointRadius: 4,
@@ -328,7 +337,7 @@ const nextPost =
           return {
             label: ds.label,
             backgroundColor: ds.color,
-            data: ds.data,
+            data: data,
           };
         });
 
