@@ -9,6 +9,8 @@ tags:
 draft: false
 ---
 
+**AI Written under human guidence**
+
 **TL;DR:** I accidentally implemented SPFA while thinking I was doing "BFS with relaxation," then had to build a min-heap from scratch before I could do Dijkstra properly. The benchmarking that followed revealed a clean crossover point that shifts with graph density and size.
 
 Source code: [seanwilliamcarroll/ds](https://github.com/seanwilliamcarroll/ds) — raw benchmark data: [release](/data/network_delay_bench_release.csv)

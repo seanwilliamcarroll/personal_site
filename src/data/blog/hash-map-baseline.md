@@ -9,6 +9,8 @@ tags:
 draft: false
 ---
 
+**AI Written under human guidence**
+
 **TL;DR:** Open addressing crushed chaining with sequential keys — 19x faster on insert. Then we switched to normally distributed keys and open addressing became 11,000x slower. The "best" hash map depends entirely on your key distribution, and the best-case benchmark is the one you should trust least.
 
 I'm learning performance engineering by building data structures from scratch and

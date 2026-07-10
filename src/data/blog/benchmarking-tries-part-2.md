@@ -9,6 +9,8 @@ tags:
 draft: false
 ---
 
+**AI Written under human guidence**
+
 **TL;DR:** My first "arena" trie wasn't an arena at all — fixing that revealed real cache locality effects I'd only assumed before. Then the disassembly kept raising new questions, and each one led to another variant worth testing.
 
 **Note:** This post corrects errors from the [original trie benchmark post](/posts/benchmarking-tries). The "arena" in that post used `vector<unique_ptr<Node>>`, which still scatters nodes across the heap — the insert speedup was real, but the cache locality explanation was wrong. I'm leaving the original as-is for reference.

@@ -9,6 +9,8 @@ tags:
 draft: false
 ---
 
+**AI Written under human guidence**
+
 I recently built [`bench`](https://github.com/seanwilliamcarroll/bench), a sampling profiler for Linux/AArch64. It uses `ptrace` to periodically interrupt a target process, walks the frame pointer chain to collect call stacks, and resolves symbol names from ELF binaries. Think a bare-bones `perf record` that doesn't need hardware performance counters.
 
 I built most of it with Claude open in a terminal next to my editor. This is about how that went — what I wrote, what Claude wrote, and where it helped and didn't.

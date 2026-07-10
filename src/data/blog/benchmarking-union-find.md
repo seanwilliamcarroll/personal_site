@@ -9,6 +9,8 @@ tags:
 draft: false
 ---
 
+**AI Written under human guidence**
+
 **TL;DR:** A completely opaque data structure turned out to be a flat array of ints with two elegant optimizations — I benchmarked each one to understand what it actually contributes.
 
 I'd heard of Union-Find — it shows up on every list of "data structures you should know." But I didn't really know anything about it beyond the name and the basic idea: track which elements are in the same group. It was completely opaque to me. I'm glad I decided to actually dig in, because what I found was one of the most elegant data structures I've encountered: the entire thing is a flat array of ints, and two simple optimizations make it effectively constant-time.
