@@ -120,7 +120,6 @@ On the raw repo, a solid mix of AI and human authorship.
       Human-authored    16565 lines
       ████████████░░░░░░░░░░░░  51.1% AI
 
-
 When I filter out the test code as well as code for the other toy language I had written a few years ago (blip, which was entirely human-generated of course), the story changes yet again.
 
     TOTAL
