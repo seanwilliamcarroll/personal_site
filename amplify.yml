@@ -3,6 +3,10 @@ frontend:
   phases:
     preBuild:
       commands:
+        # The Node in .nvmrc, not whatever the build image defaults to
+        # (which is how CI and local development choose theirs too).
+        - nvm install
+        - node -v
         - npm ci
     build:
       commands:

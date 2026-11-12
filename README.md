@@ -11,6 +11,17 @@ Personal website for Sean William Carroll, built with [Astro](https://astro.buil
 | `npm run build`   | Build production site to `./dist/`         |
 | `npm run preview` | Preview production build locally           |
 
+## Workflow
+
+`main` is protected: changes go through a pull request, and CI
+(`.github/workflows/ci.yml`: Prettier, ESLint, type check and build) must
+pass before it can be squash-merged. Merging deploys: Amplify builds
+`main` on every push to it.
+
+Node comes from `.nvmrc` (`nvm use`); CI and Amplify's build read the same
+file. `./install-hooks.sh` installs the local git hooks, which run the
+same checks before a commit and a push.
+
 ## Structure
 
 ```
