@@ -12,6 +12,16 @@ npm run lint     # ESLint
 npm run format   # Prettier
 ```
 
+## Workflow
+
+- `main` is protected (a GitHub ruleset): no direct pushes. Branch, open a
+  pull request, wait for CI, squash-merge. Merging deploys (Amplify builds
+  `main`).
+- CI (`.github/workflows/ci.yml`) runs on every pull request: Prettier
+  (`npm run format:check`), ESLint, and `npm run build` (which includes
+  `astro check`). It mirrors the git hooks from `install-hooks.sh`.
+- Node comes from `.nvmrc`; CI and `amplify.yml` both read it.
+
 ## Architecture
 
 Astro static site using the AstroPaper theme, hosted on AWS Amplify. Pushing to `main` triggers an automatic build via `amplify.yml` (`npm ci` + `npm run build` → `dist/`).
