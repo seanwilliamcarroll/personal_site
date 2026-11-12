@@ -15,7 +15,7 @@ fail()    { printf "  ${RED}✗${RESET} %s\n" "$1"; }
 
 # ── Prettier ─────────────────────────────────────────────────────────────────
 section "Prettier"
-STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(astro|ts|js|mjs|md|json|css)$')
+STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(astro|ts|js|mjs|md|mdx|json|css)$')
 if [ -n "$STAGED" ]; then
   echo "$STAGED" | xargs npx prettier --write --log-level warn
   echo "$STAGED" | xargs git add
