@@ -32,7 +32,7 @@ Astro static site using the AstroPaper theme, hosted on AWS Amplify. Pushing to 
 - `astro.config.ts` — Astro/Vite config, sitemap, markdown plugins, font
 
 **Content:**
-- `src/data/blog/` — blog posts as Markdown. Required frontmatter: `title`, `description`, `pubDatetime` (ISO 8601). Optional: `tags`, `draft`, `featured`.
+- `src/data/blog/` — blog posts as Markdown (`.md`), or MDX (`.mdx`) when a post needs to hold a component. Required frontmatter: `title`, `description`, `pubDatetime` (ISO 8601). Optional: `tags`, `draft`, `featured`.
 - `src/pages/about.md` and `src/pages/resume.md` — standalone pages using `AboutLayout.astro`
 - `public/` — static assets (favicons, `images/`, `documents/resume.pdf`). Copied verbatim to `dist/` at build time — not processed by Astro.
 - `src/assets/` — images processed/optimized by Astro at build time

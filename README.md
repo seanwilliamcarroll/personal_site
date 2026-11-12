@@ -40,7 +40,7 @@ public/
 
 ## Adding content
 
-Blog posts go in `src/data/blog/` as Markdown files. Required frontmatter:
+Blog posts go in `src/data/blog/` as Markdown files (`.md`, or `.mdx` when a post embeds a component). Required frontmatter:
 
 ```yaml
 ---

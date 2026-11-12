@@ -2,6 +2,7 @@ import { defineConfig, envField, fontProviders } from "astro/config";
 import { unified } from "@astrojs/markdown-remark";
 import tailwindcss from "@tailwindcss/vite";
 import sitemap from "@astrojs/sitemap";
+import mdx from "@astrojs/mdx";
 import remarkToc from "remark-toc";
 import remarkCollapse from "remark-collapse";
 import {
@@ -19,6 +20,9 @@ export default defineConfig({
     sitemap({
       filter: page => SITE.showArchives || !page.endsWith("/archives"),
     }),
+    // Posts may be .mdx (Markdown that can hold components). It inherits
+    // the markdown options below.
+    mdx(),
   ],
   markdown: {
     // Astro 7 defaults to the Sätteri processor, which doesn't accept
