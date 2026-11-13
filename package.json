@@ -11,6 +11,7 @@
     "format:check": "prettier --check .",
     "format": "prettier --write .",
     "lint": "eslint .",
+    "check:og": "node scripts/check-og.mjs",
     "build:demos": "PUBLIC_SHOW_DRAFTS=true astro build --outDir dist-demos",
     "test:demos": "npm run build:demos && playwright test"
   },
@@ -27,7 +28,7 @@
     "physics-engine": "https://github.com/seanwilliamcarroll/physics/releases/download/v0.1.0/physics-engine-0.1.0.tgz",
     "remark-collapse": "^0.1.2",
     "remark-toc": "^9.0.0",
-    "satori": "~0.33.5",
+    "satori": "^0.63.2",
     "sharp": "^0.35.3",
     "slugify": "^1.6.6",
     "tailwindcss": "^4.1.18",

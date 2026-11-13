@@ -54,6 +54,11 @@ jobs:
           grep -q 'googletagmanager.com/gtag/js?id=G-' dist/index.html
           test ! -e dist/posts/demo-wrapper-check
 
+      # The social-preview images: nothing else looks at them, and a
+      # dependency upgrade once drew them wrongly without an error.
+      - name: The preview images are framed as intended
+        run: npm run check:og
+
   # The embedded demos, in a real browser (tests/, playwright.config.ts):
   # a second build, with drafts and without the analytics tag, so the
   # wrapper's test pages exist and a test run isn't counted as a visit.
