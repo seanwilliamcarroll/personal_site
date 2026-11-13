@@ -1,4 +1,7 @@
-@import "tailwindcss";
+/* Tailwind looks for class names only under src/. By default it scans
+   every file in the repository that git doesn't ignore, so a word in
+   CLAUDE.md or a test ("shadow") became a rule in the published CSS. */
+@import "tailwindcss" source("..");
 @import "./typography.css";
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
