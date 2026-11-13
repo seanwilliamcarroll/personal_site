@@ -81,10 +81,32 @@ as a desktop and as a phone. Once per machine:
 - `tests/fixtures.ts`: any request to another site is refused and fails
   the test, and so does any console error.
 
-**Dependencies** are kept on their latest versions; `npm outdated` and
-`npm audit` should both be empty, with these exceptions (`package.json`):
+**Dependencies** (`package.json`, `.npmrc`). Installing a package runs
+its code on this machine, so three guards, which need npm 11.16+ (it
+comes with Node 24, `.nvmrc`; `engines` refuses an older npm, which
+would ignore the settings without a word):
 
-- `typescript` is on 6: `typescript-eslint` doesn't accept 7 yet.
+- **A week's wait** (`min-release-age=7`): npm installs only versions
+  published at least 7 days ago. Hijacked releases are usually found and
+  pulled within days. A security fix that's newer can be let through by
+  adding its package to `min-release-age-exclude` in `.npmrc`, then
+  taken out again.
+- **No install scripts unless approved** (`strict-allow-scripts=true`):
+  a dependency that wants to run a script at install fails the install
+  until `allowScripts` in `package.json` says yes or no. Today: only
+  `fsevents` has one (`node-gyp rebuild`, a C compile), and it is
+  denied; it ships a prebuilt binary, and file watching works without
+  the script (checked). A new entry means a package started running code
+  at install: look at what it runs before approving it.
+- **`engine-strict=true`**, with `engines` in `package.json`.
+
+Upgrading: `npm outdated`, then raise ranges; the week's wait still
+applies, so the newest versions may not be installable yet. `npm audit`
+should stay empty. Exceptions, by design:
+
+- `typescript` is on 6: `typescript-eslint` and `@astrojs/check` don't
+  accept 7 yet (7 is the compiler rewritten in Go, without the old
+  JavaScript API they use).
 - `overrides` lift three packages their parents pin below a fixed
   version: `fflate` (under satori), `postcss-selector-parser` (under
   `@tailwindcss/typography`), and any `minimatch` from 7 to 11.0.0
