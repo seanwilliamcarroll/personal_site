@@ -1,0 +1,23 @@
+---
+title: "Demo wrapper check"
+description: "A draft that exercises the demo wrapper. Not published."
+pubDatetime: 2026-11-12T12:00:00-05:00
+draft: true
+tags:
+  - test
+---
+
+import Bounce from "@/components/demo/Bounce.astro";
+
+This page is a draft: it is built only with `PUBLIC_SHOW_DRAFTS=true`, for
+checking the demo wrapper by hand and in the demo tests.
+
+Some text first, so the demo starts below the fold on a small window.
+
+{/* Tall spacer: the demo must not be on screen when the page loads. */}
+
+<div style="height: 120vh" />
+
+<Bounce />
+
+Text after the demo.
