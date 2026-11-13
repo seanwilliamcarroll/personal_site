@@ -1,6 +1,11 @@
 # build output
 dist/
 
+# the demo tests' build and results (npm run test:demos)
+dist-demos/
+test-results/
+playwright-report/
+
 # generated types
 .astro/
 

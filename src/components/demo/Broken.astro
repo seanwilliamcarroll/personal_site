@@ -1,0 +1,17 @@
+---
+// A demo that can't start: its factory throws. It exists so the tests
+// can see the wrapper's failure message (tests/wrapper.spec.ts).
+import Demo from "./Demo.astro";
+---
+
+<Demo name="broken" label="A demo that fails to start">
+  A demo that fails to start.
+</Demo>
+
+<script>
+  import { registerDemo } from "./lifecycle";
+
+  registerDemo("broken", () => {
+    throw new Error("broken on purpose");
+  });
+</script>

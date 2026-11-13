@@ -1,7 +1,7 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist", "public/pagefind"],
+  "exclude": ["dist", "dist-demos", "playwright-report", "public/pagefind"],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {

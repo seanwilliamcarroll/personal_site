@@ -10,6 +10,7 @@ npm run build    # Production build to ./dist/
 npm run preview  # Preview production build locally
 npm run lint     # ESLint
 npm run format   # Prettier
+npm run test:demos  # The demo tests (Playwright), against their own build
 ```
 
 ## Workflow
@@ -19,7 +20,8 @@ npm run format   # Prettier
   `main`).
 - CI (`.github/workflows/ci.yml`) runs on every pull request: Prettier
   (`npm run format:check`), ESLint, and `npm run build` (which includes
-  `astro check`). It mirrors the git hooks from `install-hooks.sh`.
+  `astro check`) in the job `check`, which mirrors the git hooks from
+  `install-hooks.sh`; and the demo tests in the job `demos`.
 - Node comes from `.nvmrc`; CI and `amplify.yml` both read it.
 
 ## Architecture
@@ -57,11 +59,24 @@ Astro static site using the AstroPaper theme, hosted on AWS Amplify. Pushing to 
 `PUBLIC_SHOW_DRAFTS=true npm run dev` to look at one. Amplify never sets
 it.
 
+**Demo tests** (`tests/`, `playwright.config.ts`): `npm run test:demos`
+builds the site with drafts into `dist-demos/` and drives it in Chromium,
+as a desktop and as a phone. Once per machine:
+`npx playwright install chromium`.
+
+- `tests/demo-pages.ts` lists every page with a demo. Add a new post's
+  page there: `tests/demos.spec.ts` then checks that each demo starts,
+  draws, moves, pauses, and is disposed on leaving the page.
+- `tests/wrapper.spec.ts` checks the wrapper itself on two draft posts
+  (`demo-wrapper-check`, `demo-failure-check`).
+- `tests/fixtures.ts`: any request to another site is refused and fails
+  the test, and so does any console error.
+
 **Nav menu** is hardcoded in `src/components/Header.astro` (not config-driven).
 
 **Layouts:** `Layout.astro` is the base HTML shell (handles SEO meta, GA, fonts). `AboutLayout.astro` wraps it for simple prose pages. `PostDetails.astro` wraps it for blog posts.
 
-**Google Analytics** (`G-Q68J475RQW`) is in `Layout.astro` with Do Not Track support.
+**Google Analytics** (`G-Q68J475RQW`) is `src/components/Analytics.astro`, with Do Not Track support. `Layout.astro` includes it only in the published build (`src/utils/analytics.ts`): not under `npm run dev`, and not in the demo tests' build. CI checks the ordinary build still has it.
 
 ## Planning
 

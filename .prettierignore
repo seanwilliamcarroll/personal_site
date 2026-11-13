@@ -3,6 +3,8 @@
 
 # Except these files & folders
 !/src
+!/tests
+!playwright.config.ts
 !/public
 !/.github
 !tsconfig.json
