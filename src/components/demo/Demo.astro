@@ -25,15 +25,17 @@ const { name, aspect = "16 / 9", label } = Astro.props;
     role="img"
     aria-label={label}
     class="block w-full rounded-md border border-border bg-background"
-    style={`aspect-ratio: ${aspect}`}></canvas>
+    style={`aspect-ratio: ${aspect}`}
+  ></canvas>
   <p
     data-demo-message
     hidden
     class="rounded-md border border-border p-4 text-sm italic"
-  >
-  </p>
+  ></p>
   <figcaption class="mt-2 flex items-center justify-between gap-4 text-sm">
-    <span class="opacity-80"><slot /></span>
+    <span class="opacity-80">
+      <slot />
+    </span>
     <button
       type="button"
       data-demo-toggle
