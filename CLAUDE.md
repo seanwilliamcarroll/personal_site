@@ -37,6 +37,26 @@ Astro static site using the AstroPaper theme, hosted on AWS Amplify. Pushing to 
 - `public/` — static assets (favicons, `images/`, `documents/resume.pdf`). Copied verbatim to `dist/` at build time — not processed by Astro.
 - `src/assets/` — images processed/optimized by Astro at build time
 
+**Embedded demos** (`src/components/demo/`):
+
+- `Demo.astro` is the frame (canvas, play/pause, a failure message);
+  `lifecycle.ts` decides when a demo starts (scrolled into view), runs
+  (on screen, tab visible, not paused; paused at first under "reduce
+  motion"), and is torn down (before every client-side page swap).
+- A demo is its own component that renders `<Demo name="x" …>` and, in a
+  processed `<script>`, calls `registerDemo("x", canvas => ({ frame,
+  dispose }))`. `Bounce.astro` is the minimal example. Draw with the
+  colours passed to `frame`: they follow the theme.
+- The wrapper's element carries `data-demo-state` (`idle`, `loading`,
+  `running`, `paused`, `failed`) and `data-demo-frames`; `<html>` carries
+  `data-demo-live` (how many are mounted). Tests read these.
+- Posts that embed a demo are `.mdx`.
+
+**Drafts** (`draft: true`) are not built, except with
+`PUBLIC_SHOW_DRAFTS=true` in the environment (`src/utils/drafts.ts`):
+`PUBLIC_SHOW_DRAFTS=true npm run dev` to look at one. Amplify never sets
+it.
+
 **Nav menu** is hardcoded in `src/components/Header.astro` (not config-driven).
 
 **Layouts:** `Layout.astro` is the base HTML shell (handles SEO meta, GA, fonts). `AboutLayout.astro` wraps it for simple prose pages. `PostDetails.astro` wraps it for blog posts.

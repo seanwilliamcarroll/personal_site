@@ -1,3 +1,4 @@
+import { isBuilt } from "@/utils/drafts";
 import type { APIRoute } from "astro";
 import { getCollection, type CollectionEntry } from "astro:content";
 import { getPath } from "@/utils/getPath";
@@ -10,7 +11,7 @@ export async function getStaticPaths() {
   }
 
   const posts = await getCollection("blog").then(p =>
-    p.filter(({ data }) => !data.draft && !data.ogImage)
+    p.filter(post => isBuilt(post) && !post.data.ogImage)
   );
 
   return posts.map(post => ({

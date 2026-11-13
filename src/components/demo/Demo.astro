@@ -1,0 +1,50 @@
+---
+// The frame around an embedded demo: a canvas, a play/pause control, and
+// room for a failure message. The demo itself is registered under
+// `name` by its own component (see Bounce.astro); lifecycle.ts decides
+// when it starts, runs, pauses and is torn down.
+type Props = {
+  /** The name the demo registers under. */
+  name: string;
+  /** The canvas's shape, width / height. */
+  aspect?: string;
+  /** What the demo shows, for people who can't see the canvas. */
+  label: string;
+};
+
+const { name, aspect = "16 / 9", label } = Astro.props;
+---
+
+<figure
+  data-demo={name}
+  data-demo-state="idle"
+  data-demo-frames="0"
+  class="not-prose my-6"
+>
+  <canvas
+    role="img"
+    aria-label={label}
+    class="block w-full rounded-md border border-border bg-background"
+    style={`aspect-ratio: ${aspect}`}></canvas>
+  <p
+    data-demo-message
+    hidden
+    class="rounded-md border border-border p-4 text-sm italic"
+  >
+  </p>
+  <figcaption class="mt-2 flex items-center justify-between gap-4 text-sm">
+    <span class="opacity-80"><slot /></span>
+    <button
+      type="button"
+      data-demo-toggle
+      class="rounded-md border border-border px-3 py-1 hover:text-accent focus-visible:outline-2 focus-visible:outline-accent"
+    >
+      Pause
+    </button>
+  </figcaption>
+</figure>
+
+<script>
+  // Loads the lifecycle on any page that has a demo.
+  import "./lifecycle";
+</script>

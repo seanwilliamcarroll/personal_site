@@ -1,0 +1,47 @@
+---
+// A demo with no physics engine in it: a ball bouncing in a box. It
+// exists to exercise the wrapper (Demo.astro, lifecycle.ts) and is the
+// simplest example of writing one.
+import Demo from "./Demo.astro";
+---
+
+<Demo name="bounce" label="A ball bouncing around a box">
+  <slot>A ball in a box: the demo wrapper, with nothing loaded.</slot>
+</Demo>
+
+<script>
+  import { registerDemo } from "./lifecycle";
+  import type { Demo, FrameInfo } from "./lifecycle";
+
+  /** The ball, in units of the box's height: position, velocity. */
+  const RADIUS = 0.06;
+  const SPEED = { x: 0.55, y: 0.4 };
+
+  registerDemo("bounce", (canvas): Demo => {
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("no 2D canvas");
+    let [x, y] = [0.3, 0.4];
+    let [vx, vy] = [SPEED.x, SPEED.y];
+    return {
+      frame(dt: number, { colors, width, height }: FrameInfo) {
+        const wide = width / height;
+        x += vx * dt;
+        y += vy * dt;
+        if (x < RADIUS || x > wide - RADIUS) {
+          vx = -vx;
+          x = Math.min(Math.max(x, RADIUS), wide - RADIUS);
+        }
+        if (y < RADIUS || y > 1 - RADIUS) {
+          vy = -vy;
+          y = Math.min(Math.max(y, RADIUS), 1 - RADIUS);
+        }
+        ctx.fillStyle = colors.background;
+        ctx.fillRect(0, 0, width, height);
+        ctx.fillStyle = colors.accent;
+        ctx.beginPath();
+        ctx.arc(x * height, y * height, RADIUS * height, 0, 2 * Math.PI);
+        ctx.fill();
+      },
+    };
+  });
+</script>
