@@ -36,31 +36,30 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.6",
+    "@eslint/js": "^10.0.1",
     "@pagefind/default-ui": "^1.4.0",
     "@playwright/test": "^1.65.0",
     "@shikijs/transformers": "^4.3.1",
     "@tailwindcss/typography": "^0.5.19",
     "@types/lodash.kebabcase": "^4.1.9",
     "@typescript-eslint/parser": "^8.51.0",
-    "eslint": "^9.39.2",
-    "eslint-plugin-astro": "^1.5.0",
+    "eslint": "^10.14.0",
+    "eslint-plugin-astro": "^3.2.1",
     "globals": "^17.7.0",
     "pagefind": "^1.4.0",
     "prettier": "^3.7.4",
-    "prettier-plugin-astro": "^0.14.1",
+    "prettier-plugin-astro": "^1.1.2",
     "prettier-plugin-tailwindcss": "^0.8.0",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "typescript-eslint": "^8.51.0"
   },
   "overrides": {
     "@tailwindcss/typography": {
       "postcss-selector-parser": "^6.1.5"
     },
-    "@typescript-eslint/typescript-estree": {
-      "minimatch": "^11.0.1"
-    },
     "satori": {
       "fflate": "^0.7.5"
-    }
+    },
+    "minimatch@>=7 <11.0.1": "^11.0.1"
   }
 }

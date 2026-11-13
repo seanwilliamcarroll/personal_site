@@ -11,6 +11,7 @@ npm run preview  # Preview production build locally
 npm run lint     # ESLint
 npm run format   # Prettier
 npm run test:demos  # The demo tests (Playwright), against their own build
+npm run check:og    # The social-preview images in dist/ (after a build)
 ```
 
 ## Workflow
@@ -80,17 +81,22 @@ as a desktop and as a phone. Once per machine:
 - `tests/fixtures.ts`: any request to another site is refused and fails
   the test, and so does any console error.
 
-**Dependency pins** (`package.json`), each there for `npm audit`:
+**Dependencies** are kept on their latest versions; `npm outdated` and
+`npm audit` should both be empty, with these exceptions (`package.json`):
 
-- `satori` is held at `~0.33.5` (the first release with the SVG-escaping
-  fix). Newer releases draw the social-preview images differently: at
-  0.63 the shadow box is painted over the text. Moving up means fixing
-  `src/utils/og-templates/` and comparing the PNGs.
-- `overrides` lift three packages their parents pin too low:
-  `fflate` under satori, `postcss-selector-parser` under
-  `@tailwindcss/typography`, `minimatch` under
-  `@typescript-eslint/typescript-estree`. Drop each once its parent
-  asks for a fixed version itself.
+- `typescript` is on 6: `typescript-eslint` doesn't accept 7 yet.
+- `overrides` lift three packages their parents pin below a fixed
+  version: `fflate` (under satori), `postcss-selector-parser` (under
+  `@tailwindcss/typography`), and any `minimatch` from 7 to 11.0.0
+  (under ESLint and typescript-eslint). Drop each once `npm audit` is
+  clean without it.
+
+**Social-preview images** (`src/utils/og-templates/`, drawn by satori at
+build time): `frame.js` places the two cards by explicit pixel
+coordinates, so the picture doesn't depend on a renderer's defaults.
+`npm run check:og` (in CI, after the build) checks every image is framed
+as intended: nothing else would notice a satori upgrade drawing them
+wrongly, which has happened.
 
 **Nav menu** is hardcoded in `src/components/Header.astro` (not config-driven).
 
