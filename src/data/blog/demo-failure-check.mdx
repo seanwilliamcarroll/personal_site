@@ -1,0 +1,17 @@
+---
+title: "Demo failure check"
+description: "A draft whose demo fails to start. Not published."
+pubDatetime: 2026-11-12T12:30:00-05:00
+draft: true
+tags:
+  - test
+---
+
+import Broken from "@/components/demo/Broken.astro";
+
+This page is a draft: it is built only with `PUBLIC_SHOW_DRAFTS=true`, for
+checking what a reader sees when a demo can't start.
+
+<Broken />
+
+Text after the demo.
