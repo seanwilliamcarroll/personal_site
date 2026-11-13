@@ -1,6 +1,9 @@
 #!/bin/sh
 set -e
 
+# The hooks run npm through the development container (./dc,
+# CONTAINER.md): Colima's `site` VM must be running.
+
 cat > .git/hooks/pre-commit << 'EOF'
 #!/bin/bash
 GREEN='\033[0;32m'
@@ -17,7 +20,7 @@ fail()    { printf "  ${RED}✗${RESET} %s\n" "$1"; }
 section "Prettier"
 STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(astro|ts|js|mjs|md|mdx|json|css)$')
 if [ -n "$STAGED" ]; then
-  echo "$STAGED" | xargs npx prettier --write --log-level warn
+  echo "$STAGED" | xargs ./dc npx prettier --write --log-level warn
   echo "$STAGED" | xargs git add
   COUNT=$(echo "$STAGED" | wc -l | tr -d ' ')
   pass "Formatted and re-staged $COUNT file(s)"
@@ -27,7 +30,7 @@ fi
 
 # ── ESLint ────────────────────────────────────────────────────────────────────
 section "ESLint"
-LINT_OUTPUT=$(npm run lint 2>&1)
+LINT_OUTPUT=$(./dc npm run lint 2>&1)
 LINT_STATUS=$?
 if [ $LINT_STATUS -ne 0 ]; then
   echo "$LINT_OUTPUT"
@@ -38,7 +41,7 @@ pass "No lint errors"
 
 # ── Astro check ───────────────────────────────────────────────────────────────
 section "Astro check"
-CHECK_OUTPUT=$(npm run astro -- check 2>&1)
+CHECK_OUTPUT=$(./dc npm run astro -- check 2>&1)
 CHECK_STATUS=$?
 echo "$CHECK_OUTPUT" | grep -E "Result|error|warning|hint" | sed 's/^/  /'
 if [ $CHECK_STATUS -ne 0 ]; then
@@ -63,7 +66,7 @@ pass()    { printf "  ${GREEN}✓${RESET} %s\n" "$1"; }
 fail()    { printf "  ${RED}✗${RESET} %s\n" "$1"; }
 
 section "Production build"
-npm run build
+./dc npm run build
 if [ $? -ne 0 ]; then
   fail "Build failed — fix errors before pushing"
   printf "\n"

@@ -1,0 +1,49 @@
+#!/bin/sh
+# Runs a command in the site's development container (CONTAINER.md):
+#
+#   ./dc npm ci
+#   ./dc npm run build
+#   ./dc -p 4321 npm run dev -- --host
+#
+# -p PORT (repeatable) publishes a port to this Mac only (127.0.0.1).
+# Needs Colima's `site` VM running: `colima start --profile site`.
+set -eu
+cd "$(dirname "$0")"
+
+# Colima's `site` VM, unless DOCKER_HOST says otherwise (CI).
+: "${DOCKER_HOST:=unix://$HOME/.colima/site/docker.sock}"
+export DOCKER_HOST
+if ! docker info >/dev/null 2>&1; then
+  echo "dc: no Docker at $DOCKER_HOST. Start it: colima start --profile site" >&2
+  exit 1
+fi
+
+ports=""
+while [ "${1:-}" = "-p" ]; do
+  ports="$ports -p 127.0.0.1:$2:$2"
+  shift 2
+done
+[ $# -gt 0 ] || { echo "usage: ./dc [-p PORT]... COMMAND [ARG]..." >&2; exit 2; }
+
+# The image, rebuilt only when the Dockerfile or Playwright's version
+# changes (Docker's cache makes an unchanged build a no-op).
+playwright=$(awk '/"node_modules\/@playwright\/test": \{/{f=1} f&&/"version"/{gsub(/[",]/,"",$2); print $2; exit}' package-lock.json)
+log=$(mktemp)
+if ! docker build --quiet --tag personal-site-dev \
+  --build-arg "PLAYWRIGHT_VERSION=$playwright" container >"$log" 2>&1; then
+  cat "$log" >&2
+  rm -f "$log"
+  echo "dc: building the image failed" >&2
+  exit 1
+fi
+rm -f "$log"
+
+tty=""
+[ -t 0 ] && [ -t 1 ] && tty="-t"
+# shellcheck disable=SC2086 # $ports and $tty are word lists on purpose
+exec docker run --rm -i $tty $ports \
+  -v "$PWD:/work" \
+  -v personal-site-node-modules:/work/node_modules \
+  -v personal-site-npm-cache:/home/node/.npm \
+  -e CI -e PUBLIC_SHOW_DRAFTS \
+  personal-site-dev "$@"

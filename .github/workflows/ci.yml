@@ -92,3 +92,26 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+  # The development container (CONTAINER.md, ./dc): built, and the site
+  # built in it, so a change to the Dockerfile, Node or Playwright that
+  # breaks it shows here rather than on someone's Mac.
+  container:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      # The runner's own Docker, not Colima's VM.
+      DOCKER_HOST: unix:///var/run/docker.sock
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # The container runs as `node` (uid 1000); the checkout belongs to
+      # the runner's user. On a Mac, Colima maps ownership itself.
+      - name: Let the container's user write the checkout
+        run: sudo chown -R 1000:1000 .
+
+      - name: Install, in the container
+        run: ./dc npm ci
+
+      - name: Build, in the container
+        run: ./dc npm run build

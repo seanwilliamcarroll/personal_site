@@ -4,14 +4,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
+npm runs **only in the development container** (`CONTAINER.md`), through
+`./dc`; git, `gh` and `aws` run on the Mac. Never run `npm`, `npx` or
+`node` on the Mac in this repository. Colima's `site` VM must be up
+(`colima start --profile site`).
+
 ```bash
-npm run dev      # Local dev server at localhost:4321
-npm run build    # Production build to ./dist/
-npm run preview  # Preview production build locally
-npm run lint     # ESLint
-npm run format   # Prettier
-npm run test:demos  # The demo tests (Playwright), against their own build
-npm run check:og    # The social-preview images in dist/ (after a build)
+./dc -p 4321 npm run dev -- --host   # Dev server at localhost:4321
+./dc npm run build      # Production build to ./dist/
+./dc npm run lint       # ESLint
+./dc npm run format     # Prettier
+./dc npm run test:demos # The demo tests (Playwright), against their own build
+./dc npm run check:og   # The social-preview images in dist/ (after a build)
 ```
 
 ## Workflow
