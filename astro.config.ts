@@ -50,6 +50,12 @@ export default defineConfig({
   },
   vite: {
     plugins: [tailwindcss()],
+    // In the development container (CONTAINER.md), file changes made on
+    // the Mac don't reach the container as events: the dev server checks
+    // for them instead. SITE_CONTAINER is set by container/Dockerfile.
+    ...(process.env.SITE_CONTAINER === "1" && {
+      server: { watch: { usePolling: true, interval: 300 } },
+    }),
     optimizeDeps: {
       exclude: ["@resvg/resvg-js"],
     },

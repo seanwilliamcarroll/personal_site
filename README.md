@@ -4,12 +4,16 @@ Personal website for Sean William Carroll, built with [Astro](https://astro.buil
 
 ## Commands
 
-| Command           | Action                                     |
-| :---------------- | :----------------------------------------- |
-| `npm install`     | Install dependencies                       |
-| `npm run dev`     | Start local dev server at `localhost:4321` |
-| `npm run build`   | Build production site to `./dist/`         |
-| `npm run preview` | Preview production build locally           |
+npm and everything it runs work in a development container that sees
+only this repository (`CONTAINER.md`: Colima, set up once). `./dc` runs
+a command in it.
+
+| Command                              | Action                                     |
+| :----------------------------------- | :----------------------------------------- |
+| `./dc npm ci`                        | Install dependencies                       |
+| `./dc -p 4321 npm run dev -- --host` | Start local dev server at `localhost:4321` |
+| `./dc npm run build`                 | Build production site to `./dist/`         |
+| `./dc npm run test:demos`            | The demo tests, in Chromium                |
 
 ## Workflow
 
@@ -18,9 +22,10 @@ Personal website for Sean William Carroll, built with [Astro](https://astro.buil
 pass before it can be squash-merged. Merging deploys: Amplify builds
 `main` on every push to it.
 
-Node comes from `.nvmrc` (`nvm use`); CI and Amplify's build read the same
-file. `./install-hooks.sh` installs the local git hooks, which run the
-same checks before a commit and a push.
+Node comes from `.nvmrc`; CI and Amplify's build read the same file, and
+the container's image matches it. `./install-hooks.sh` installs the local
+git hooks, which run the same checks (through `./dc`) before a commit and
+a push.
 
 ## Structure
 
