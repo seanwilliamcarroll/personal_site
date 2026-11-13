@@ -1,0 +1,21 @@
+---
+title: "Hello, particles"
+description: "The first demo on this site that runs my physics engine: a fountain of particles, compiled from Rust to WebAssembly."
+pubDatetime: 2026-11-13T12:00:00-05:00
+draft: true
+tags:
+  - physics
+---
+
+import HelloParticles from "@/components/demo/HelloParticles.astro";
+
+_A draft: the words are placeholders until the post is written._
+
+Below is a fountain of 300 particles. Each one is launched from the same
+point with a random velocity, falls under gravity, and is launched again
+when it lands. The simulation is the physics engine I've been writing in
+Rust, compiled to WebAssembly and running in this page.
+
+<HelloParticles />
+
+Text after the demo.

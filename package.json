@@ -24,6 +24,7 @@
     "astro": "^7.4.11",
     "dayjs": "^1.11.19",
     "lodash.kebabcase": "^4.1.1",
+    "physics-engine": "https://github.com/seanwilliamcarroll/physics/releases/download/v0.1.0/physics-engine-0.1.0.tgz",
     "remark-collapse": "^0.1.2",
     "remark-toc": "^9.0.0",
     "satori": "^0.26.0",
