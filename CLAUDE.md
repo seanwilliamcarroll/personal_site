@@ -130,6 +130,22 @@ wrongly, which has happened.
 
 **Google Analytics** (`G-Q68J475RQW`) is `src/components/Analytics.astro`, with Do Not Track support. `Layout.astro` includes it only in the published build (`src/utils/analytics.ts`): not under `npm run dev`, and not in the demo tests' build. CI checks the ordinary build still has it.
 
+## Amplify
+
+App `d1t62g12ueac2b` (us-east-1), branch `main`, production. Settings
+that live in AWS, not in this repository:
+
+- **Build spec:** the repository's `amplify.yml` is the one used (it
+  takes precedence). The app's stored copy in the console is the same
+  file, put there in place of the Hugo build the site started with
+  (2026-11-13); keep it in step if `amplify.yml` changes, or ignore it.
+- **One rewrite rule:** `/<*>` → `/404.html`, type `404-200`: a URL with
+  no file gets the site's "Page Not Found" page, at the same address,
+  with status 404. (Type `404` would redirect to `/404.html` and answer
+  200 there; the Hugo-era rule sent missing URLs the home page.)
+- To read them: `aws amplify get-app --app-id d1t62g12ueac2b --region
+  us-east-1`. Changing them changes the live site: done by hand.
+
 ## Planning
 
-`PLANNING.md` at repo root tracks longer-horizon ideas (not published — Hugo only served from `content/`, and this is now an Astro site). Current plans: NYT Crossword stats page (hybrid Lambda + S3 JSON + client-side rendering).
+`PLANNING.md` at repo root tracks longer-horizon ideas. It isn't published: Astro builds pages only from `src/`. Current plans: NYT Crossword stats page (hybrid Lambda + S3 JSON + client-side rendering).
