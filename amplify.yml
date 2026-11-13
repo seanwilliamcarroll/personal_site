@@ -5,7 +5,12 @@ frontend:
       commands:
         # The Node in .nvmrc, not whatever the build image defaults to
         # (which is how CI and local development choose theirs too).
-        - nvm install
+        # --skip-default-packages: for a newly installed Node, nvm
+        # otherwise installs the image's list of global packages
+        # (Amplify's CLI, Cypress, Hugo, VuePress and more: 1692
+        # packages, 48 s and 31 deprecation warnings per build, none of
+        # them used here).
+        - nvm install --skip-default-packages
         - node -v
         - npm ci
     build:
