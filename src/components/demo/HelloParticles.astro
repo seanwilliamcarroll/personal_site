@@ -1,0 +1,96 @@
+---
+// The engine's fountain: particles launched from one point under
+// gravity, relaunched when they land. The first demo that runs the
+// physics engine (the `physics-engine` package: wasm, loader, types).
+import Demo from "./Demo.astro";
+---
+
+<Demo
+  name="hello-particles"
+  aspect="4 / 3"
+  label="A fountain of particles rising and falling under gravity"
+>
+  <slot>300 particles under gravity, stepped by the engine at 60 Hz.</slot>
+</Demo>
+
+<script>
+  // The wasm's URL only: Vite copies the file into the build under a
+  // content-hashed name. Nothing is fetched until the demo starts.
+  import wasmUrl from "physics-engine/engine.wasm?url";
+  import { registerDemo } from "./lifecycle";
+  import type { Demo, FrameInfo } from "./lifecycle";
+
+  const PARTICLES = 300;
+  const SEED = 1;
+  /** Simulated before the first frame, s. Every particle is launched at
+   *  t = 0, so at first they rise and fall together, as one cloud; their
+   *  flights last 1.6 to 2.4 s, so after many of them they are spread
+   *  along the whole arc: a fountain. (It also means a paused start,
+   *  under "reduce motion", shows that and not 300 particles on one
+   *  point.) It is 1800 steps of 300 particles: loading the wasm and
+   *  warming up took 32 ms together, measured locally. */
+  const WARM_UP_S = 30;
+  const STEP_S = 1 / 60;
+
+  /** The part of the world shown, m (y up). Launch speeds are at most
+   *  2 m/s sideways and 12 m/s up, under g = 9.81 m/s²: a particle
+   *  rises at most 12² / 2g = 7.3 m, and lands at most 2 × (2 × 12 / g)
+   *  = 4.9 m to either side. */
+  const VIEW = { left: -5.5, right: 5.5, bottom: -0.4, top: 7.85 };
+  /** A particle's drawn radius, CSS px (they are points in the engine). */
+  const DOT_PX = 2.5;
+
+  registerDemo("hello-particles", async (canvas): Promise<Demo> => {
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("no 2D canvas");
+    // Loaded here, not at the top: a reader who never scrolls to the
+    // demo downloads neither the loader nor the wasm.
+    const { loadEngine, positionsView, DEMO_FOUNTAIN, SCALAR_F32 } =
+      await import("physics-engine");
+    const { engine, lastPanic } = await loadEngine(wasmUrl);
+    const demo = engine.demo_new(DEMO_FOUNTAIN, SCALAR_F32, PARTICLES, SEED);
+    if (!demo) throw new Error(lastPanic() ?? "the engine refused the scene");
+    for (let t = 0; t < WARM_UP_S; t += STEP_S) {
+      engine.demo_advance(demo, STEP_S);
+    }
+
+    return {
+      frame(dt: number, { colors, width, height, dpr }: FrameInfo) {
+        // The fixed 60 Hz clock is inside the wasm: this hands it the
+        // time that passed, and it takes as many steps as fit.
+        if (dt > 0) engine.demo_advance(demo, dt);
+
+        // The view, fitted into the canvas and centred, in device px
+        // per metre.
+        const scale = Math.min(
+          width / (VIEW.right - VIEW.left),
+          height / (VIEW.top - VIEW.bottom)
+        );
+        const originX = width / 2 - ((VIEW.left + VIEW.right) / 2) * scale;
+        const originY = height / 2 + ((VIEW.bottom + VIEW.top) / 2) * scale;
+
+        ctx.fillStyle = colors.background;
+        ctx.fillRect(0, 0, width, height);
+        // The launch height.
+        ctx.fillStyle = colors.border;
+        ctx.fillRect(0, Math.round(originY), width, Math.max(1, dpr));
+
+        // [x0, y0, x1, y1, …] in metres; a fresh view every frame (the
+        // wasm's memory can move when it grows).
+        const xy = positionsView(engine, demo);
+        ctx.fillStyle = colors.accent;
+        ctx.beginPath();
+        for (let i = 0; i + 1 < xy.length; i += 2) {
+          const x = originX + (xy[i] ?? 0) * scale;
+          const y = originY - (xy[i + 1] ?? 0) * scale;
+          ctx.moveTo(x + DOT_PX * dpr, y);
+          ctx.arc(x, y, DOT_PX * dpr, 0, 2 * Math.PI);
+        }
+        ctx.fill();
+      },
+      dispose() {
+        engine.demo_free(demo);
+      },
+    };
+  });
+</script>

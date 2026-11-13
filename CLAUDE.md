@@ -53,6 +53,14 @@ Astro static site using the AstroPaper theme, hosted on AWS Amplify. Pushing to 
   `running`, `paused`, `failed`) and `data-demo-frames`; `<html>` carries
   `data-demo-live` (how many are mounted). Tests read these.
 - Posts that embed a demo are `.mdx`.
+- Demos that run the physics engine use the `physics-engine` package
+  (wasm, loader, types). It is not on the npm registry: `package.json`
+  names a release tarball of github.com/seanwilliamcarroll/physics by
+  URL, and `package-lock.json` pins its hash. To move to a new engine
+  version: `npm install <the new release's .tgz URL>`, then
+  `npm run test:demos`. `HelloParticles.astro` is the example: the
+  package is imported inside the factory (so nothing is fetched until
+  the demo starts) and the wasm by `physics-engine/engine.wasm?url`.
 
 **Drafts** (`draft: true`) are not built, except with
 `PUBLIC_SHOW_DRAFTS=true` in the environment (`src/utils/drafts.ts`):

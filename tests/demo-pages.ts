@@ -8,4 +8,5 @@ export interface DemoPage {
 
 export const DEMO_PAGES: DemoPage[] = [
   { path: "/posts/demo-wrapper-check/", demos: ["bounce"] },
+  { path: "/posts/hello-particles/", demos: ["hello-particles"] },
 ];
