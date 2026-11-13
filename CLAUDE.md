@@ -80,6 +80,18 @@ as a desktop and as a phone. Once per machine:
 - `tests/fixtures.ts`: any request to another site is refused and fails
   the test, and so does any console error.
 
+**Dependency pins** (`package.json`), each there for `npm audit`:
+
+- `satori` is held at `~0.33.5` (the first release with the SVG-escaping
+  fix). Newer releases draw the social-preview images differently: at
+  0.63 the shadow box is painted over the text. Moving up means fixing
+  `src/utils/og-templates/` and comparing the PNGs.
+- `overrides` lift three packages their parents pin too low:
+  `fflate` under satori, `postcss-selector-parser` under
+  `@tailwindcss/typography`, `minimatch` under
+  `@typescript-eslint/typescript-estree`. Drop each once its parent
+  asks for a fixed version itself.
+
 **Nav menu** is hardcoded in `src/components/Header.astro` (not config-driven).
 
 **Layouts:** `Layout.astro` is the base HTML shell (handles SEO meta, GA, fonts). `AboutLayout.astro` wraps it for simple prose pages. `PostDetails.astro` wraps it for blog posts.

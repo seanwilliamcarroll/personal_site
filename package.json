@@ -27,7 +27,7 @@
     "physics-engine": "https://github.com/seanwilliamcarroll/physics/releases/download/v0.1.0/physics-engine-0.1.0.tgz",
     "remark-collapse": "^0.1.2",
     "remark-toc": "^9.0.0",
-    "satori": "^0.26.0",
+    "satori": "~0.33.5",
     "sharp": "^0.35.3",
     "slugify": "^1.6.6",
     "tailwindcss": "^4.1.18",
@@ -50,5 +50,16 @@
     "prettier-plugin-tailwindcss": "^0.8.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.51.0"
+  },
+  "overrides": {
+    "@tailwindcss/typography": {
+      "postcss-selector-parser": "^6.1.5"
+    },
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.1"
+    },
+    "satori": {
+      "fflate": "^0.7.5"
+    }
   }
 }
