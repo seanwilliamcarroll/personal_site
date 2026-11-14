@@ -16,6 +16,7 @@
     "format": "prettier --write .",
     "lint": "eslint .",
     "check:og": "node scripts/check-og.mjs",
+    "check:live": "node scripts/check-live.mjs",
     "build:demos": "PUBLIC_SHOW_DRAFTS=true astro build --outDir dist-demos",
     "test:demos": "npm run build:demos && playwright test"
   },
