@@ -16,6 +16,7 @@ npm runs **only in the development container** (`CONTAINER.md`), through
 ./dc npm run format     # Prettier
 ./dc npm run test:demos # The demo tests (Playwright), against their own build
 ./dc npm run check:og   # The social-preview images in dist/ (after a build)
+./dc npm run check:live # The published site: demo pages, their .wasm, a real 404
 ```
 
 ## Workflow
@@ -66,6 +67,14 @@ Astro static site using the AstroPaper theme, hosted on AWS Amplify. Pushing to 
   `npm run test:demos`. `HelloParticles.astro` is the example: the
   package is imported inside the factory (so nothing is fetched until
   the demo starts) and the wasm by `physics-engine/engine.wasm?url`.
+
+**The live check** (`scripts/check-live.mjs`, `npm run check:live`, by
+hand after a deploy or a change to Amplify's settings: it needs the
+network, so it isn't in CI): each published page with a demo loads,
+every `.wasm` its scripts name is served 200 as `application/wasm` and
+starts with wasm's magic bytes, and a made-up page is a real 404 with
+the site's own page. **Add a newly published demo post to its
+`DEMO_PAGES`** (drafts belong only in `tests/demo-pages.ts`).
 
 **Drafts** (`draft: true`) are not built, except with
 `PUBLIC_SHOW_DRAFTS=true` in the environment (`src/utils/drafts.ts`):
