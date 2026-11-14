@@ -2,20 +2,16 @@
 title: "Hello, particles"
 description: "The first demo on this site that runs my physics engine: a fountain of particles, compiled from Rust to WebAssembly."
 pubDatetime: 2026-11-13T12:00:00-05:00
-draft: true
+draft: false
 tags:
   - physics
 ---
 
 import HelloParticles from "@/components/demo/HelloParticles.astro";
 
-_A draft: the words are placeholders until the post is written._
-
-Below is a fountain of 300 particles. Each one is launched from the same
-point with a random velocity, falls under gravity, and is launched again
-when it lands. The simulation is the physics engine I've been writing in
-Rust, compiled to WebAssembly and running in this page.
+Lately I've felt that programming has completely changed. With the influx of AI agents, so much is made possible. I've always like physical simulations, but I've not had the time to really put together a real physics engine. With the help of Claude, I've managed to get something together in Rust and compile it to wasm, so I can showcase it here.  
+This project has felt more like being a tech lead than an IC, given that I've written 0% of the code. That said, I've spent a lot of time going through the architecture and testing infrastructure for this package.
+See the engine at [physics](https://github.com/seanwilliamcarroll/physics).
+Here's the very first little demo I put together!
 
 <HelloParticles />
-
-Text after the demo.
