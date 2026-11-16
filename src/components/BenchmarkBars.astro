@@ -1,0 +1,236 @@
+---
+// Before → after times as horizontal bars: one panel per group (say f32,
+// f64), one row per build, two bars a row on one shared axis. Drawn as
+// SVG when the site is built: no script. Each bar has a native tooltip;
+// each row is labelled "→ after time, change", past its longer bar so
+// the text never sits on one. Colours: "after" is
+// the theme's accent family, "before" the other theme's; both pairs
+// checked for colour-blind separation and contrast against each theme's
+// background (light #d27a3a / #006cac, dark #6b95d9 / #e8640a).
+
+export interface Row {
+  label: string;
+  before: number;
+  after: number;
+}
+
+export interface Panel {
+  title: string;
+  rows: Row[];
+}
+
+interface Props {
+  panels: Panel[];
+  unit: string;
+  /** Accessible summary of the whole figure. */
+  summary: string;
+}
+
+const { panels, unit, summary } = Astro.props;
+
+const max = Math.max(
+  ...panels.flatMap(p => p.rows.flatMap(r => [r.before, r.after]))
+);
+const step = max > 20 ? 5 : max > 8 ? 2 : 1;
+// Headroom past the longest bar, for the label that follows it.
+const top = Math.ceil((max * 1.45) / step) * step;
+const ticks = Array.from({ length: top / step + 1 }, (_, k) => k * step);
+
+// Geometry, in SVG units.
+const W = 560;
+const LABEL_W = 178;
+// Room right of the axis for its unit; after bars end well short of the
+// top, so their labels fit inside the plot.
+const VALUE_W = 40;
+const PLOT_W = W - LABEL_W - VALUE_W;
+const BAR_H = 9;
+const GAP = 2;
+const ROW_H = 2 * BAR_H + GAP + 12;
+const HEAD = 26;
+const AXIS = 22;
+const x = (v: number) => LABEL_W + (v / top) * PLOT_W;
+
+/** A bar from the baseline, its data end rounded (4 units). */
+function bar(x0: number, y: number, w: number, h: number): string {
+  const r = Math.min(4, w / 2, h / 2);
+  return `M${x0},${y}h${w - r}a${r},${r} 0 0 1 ${r},${r}v${h - 2 * r}a${r},${r} 0 0 1 ${-r},${r}h${-(w - r)}z`;
+}
+
+const fmt = (v: number) => `${v.toFixed(2)} ${unit}`;
+const change = (r: Row) =>
+  `${Math.round((r.after / r.before - 1) * 100)}%`.replace("-", "−");
+---
+
+<figure class="benchmark-bars">
+  <div class="legend" aria-hidden="true">
+    <span>
+      <i class="swatch before"></i>Before
+    </span>
+    <span>
+      <i class="swatch after"></i>After
+    </span>
+  </div>
+  {panels.map(panel => {
+    const height = HEAD + panel.rows.length * ROW_H + AXIS;
+    const plotBottom = HEAD + panel.rows.length * ROW_H;
+    return (
+      <svg
+        viewBox={`0 0 ${W} ${height}`}
+        role="img"
+        aria-label={`${panel.title}: ${summary}`}
+      >
+        <text x={0} y={16} class="panel-title">
+          {panel.title}
+        </text>
+        {ticks.map(t => (
+          <g>
+            <line
+              x1={x(t)}
+              x2={x(t)}
+              y1={HEAD - 4}
+              y2={plotBottom}
+              class="grid"
+            />
+            <text x={x(t)} y={plotBottom + 16} class="tick">
+              {t}
+            </text>
+          </g>
+        ))}
+        <text
+          x={LABEL_W + PLOT_W}
+          y={plotBottom + 16}
+          class="tick unit"
+          dx={14}
+        >
+          {unit}
+        </text>
+        {panel.rows.map((r, k) => {
+          const y = HEAD + k * ROW_H;
+          return (
+            <g>
+              <text x={LABEL_W - 8} y={y + BAR_H + 4} class="row-label">
+                {r.label}
+              </text>
+              <path
+                d={bar(LABEL_W, y, x(r.before) - LABEL_W, BAR_H)}
+                class="before"
+              >
+                <title>{`${r.label}, ${panel.title}, before: ${fmt(r.before)}`}</title>
+              </path>
+              <path
+                d={bar(LABEL_W, y + BAR_H + GAP, x(r.after) - LABEL_W, BAR_H)}
+                class="after"
+              >
+                <title>{`${r.label}, ${panel.title}, after: ${fmt(r.after)} (${change(r)})`}</title>
+              </path>
+              <text
+                x={x(Math.max(r.before, r.after)) + 6}
+                y={y + BAR_H + GAP / 2}
+                class="value"
+                dominant-baseline="middle"
+              >
+                {`→ ${fmt(r.after)}`}
+                <tspan class="change"> {change(r)}</tspan>
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+    );
+  })}
+</figure>
+
+<style>
+  .benchmark-bars {
+    margin: 1.5rem 0;
+    color: var(--foreground);
+  }
+  .legend {
+    display: flex;
+    gap: 1.25rem;
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+  }
+  .legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .swatch {
+    display: inline-block;
+    width: 0.9rem;
+    height: 0.55rem;
+    border-radius: 2px;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-top: 0.5rem;
+    font-size: 12px;
+  }
+  .panel-title {
+    fill: var(--foreground);
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .row-label {
+    fill: var(--foreground);
+    text-anchor: end;
+  }
+  .tick {
+    fill: var(--foreground);
+    opacity: 0.6;
+    text-anchor: middle;
+    font-size: 11px;
+  }
+  .tick.unit {
+    text-anchor: start;
+  }
+  .grid {
+    stroke: var(--foreground);
+    stroke-opacity: 0.12;
+    stroke-width: 1;
+  }
+  .value {
+    fill: var(--foreground);
+    font-size: 11px;
+  }
+  .change {
+    opacity: 0.7;
+  }
+  /* On a phone the whole figure scales down: larger type in SVG units
+     keeps it readable (about 10-11 px on screen). */
+  @media (max-width: 40rem) {
+    svg {
+      font-size: 17px;
+    }
+    .panel-title {
+      font-size: 19px;
+    }
+    .tick,
+    .value {
+      font-size: 15px;
+    }
+  }
+  .before,
+  .swatch.before {
+    fill: #d27a3a;
+    background: #d27a3a;
+  }
+  .after,
+  .swatch.after {
+    fill: #006cac;
+    background: #006cac;
+  }
+  :global(html[data-theme="dark"]) .before,
+  :global(html[data-theme="dark"]) .swatch.before {
+    fill: #6b95d9;
+    background: #6b95d9;
+  }
+  :global(html[data-theme="dark"]) .after,
+  :global(html[data-theme="dark"]) .swatch.after {
+    fill: #e8640a;
+    background: #e8640a;
+  }
+</style>

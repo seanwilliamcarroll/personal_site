@@ -10,6 +10,7 @@ tags:
 
 import Gravity from "@/components/demo/Gravity.astro";
 import SideBySide from "@/components/SideBySide.astro";
+import BenchmarkBars from "@/components/BenchmarkBars.astro";
 
 I've been interested in profiling and optimization for a few years now. I've done it a few times in professional code, though I've not really had the opportunity to do so lately. For the past several weeks, I've been having fun with Claude by building a [physics engine](https://github.com/seanwilliamcarroll/physics) from (mostly) vanilla Rust. The engine is all Rust, and I've had Claude wrap things in TypeScript when appropriate so I could display some visual demos on this site. I've written 0% of the code, all of it coming from Claude (mostly Opus 5.5, and some Fable 5.2 when I had the credit), but I've been managing the process. I've pushed for particular features, including gravity and collisions, acoustics in the form of physically simulating piano strings (an homage to a fun project from university), and some interesting demos of swarming behavior. All along, I'd been stopping my agent to do health checks of the codebase when I could: mutation testing with [cargo-mutants](https://mutants.rs), benchmarking with [criterion](https://github.com/bheisler/criterion.rs), property testing with [proptest](https://github.com/proptest-rs/proptest) and so on, in addition to the normal unit testing and coverage collection. Recently, I finally took the time to pick a particular benchmark and see if I could improve things.
 
@@ -398,7 +399,22 @@ LBB95_8:
 </div>
 </SideBySide>
 
-> **TODO:** what changed in the source to get from one to the other (two passes; the branch as a select; the lanes; a function boundary so the compiler knows the arrays don't overlap).
+### What changed in the source
+
+Four things got the compiler from the left-hand loop to the right:
+
+- **Two passes.** Pass one sums nothing across pairs, so each pair is
+  independent and four fit in one instruction; pass two does body $i$'s
+  sum on its own.
+- **Separate arrays.** One array per quantity ($x$, $y$, mass, inverse
+  mass), so a vector load picks up the same quantity for four bodies.
+- **A select for the branch.** `if d_sq == 0 { 0 } else { s }` computes
+  every lane and zeroes the 0/0 ones, where `continue` stopped the
+  vectorizer.
+- **A function boundary.** Pass one is its own function, so its arrays
+  are parameters, and Rust promises the compiler that `&mut` parameters
+  don't overlap. Written inline, the compiler checked for overlap at run
+  time and took its scalar path: twice as slow.
 
 ## Benchmarks
 
@@ -406,6 +422,41 @@ LBB95_8:
 after. Native builds are the default (baseline) build unless noted;
 "wasm" is the same Rust compiled to WebAssembly with `simd128`, run by
 wasmtime or by V8, Chrome's engine (Node).
+
+<BenchmarkBars
+  unit="ms"
+  summary="the gravity loop at 4,096 bodies, before and after, per machine and build"
+  panels={[
+    {
+      title: "f32",
+      rows: [
+        { label: "Zen 5, native", before: 13.42, after: 4.68 },
+        { label: "Zen 5, AVX2", before: 13.16, after: 2.79 },
+        { label: "Zen 5, AVX-512", before: 13.14, after: 1.58 },
+        { label: "Zen 5, wasmtime", before: 14.35, after: 4.67 },
+        { label: "Zen 5, V8", before: 22.23, after: 4.72 },
+        { label: "M4, native", before: 8.77, after: 4.28 },
+        { label: "M4, wasmtime", before: 10.52, after: 4.43 },
+        { label: "M4, V8", before: 10.55, after: 4.33 },
+      ],
+    },
+    {
+      title: "f64",
+      rows: [
+        { label: "Zen 5, native", before: 18.74, after: 10.88 },
+        { label: "Zen 5, AVX2", before: 18.7, after: 6.67 },
+        { label: "Zen 5, AVX-512", before: 18.75, after: 3.2 },
+        { label: "Zen 5, wasmtime", before: 18.72, after: 10.92 },
+        { label: "Zen 5, V8", before: 18.72, after: 10.88 },
+        { label: "M4, native", before: 8.72, after: 8.61 },
+        { label: "M4, wasmtime", before: 9.82, after: 8.71 },
+        { label: "M4, V8", before: 10.65, after: 8.3 },
+      ],
+    },
+  ]}
+/>
+
+The same numbers:
 
 | Machine                   | Build           | `f32`                  | `f64`                   |
 | ------------------------- | --------------- | ---------------------- | ----------------------- |
