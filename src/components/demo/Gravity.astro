@@ -80,7 +80,7 @@ import Demo from "./Demo.astro";
         const time = Number.isNaN(stepMs)
           ? ""
           : ` · a step in ${stepMs.toFixed(1)} ms`;
-        ctx.fillStyle = colors.muted;
+        ctx.fillStyle = colors.foreground;
         ctx.font = `${12 * dpr}px ui-monospace, monospace`;
         ctx.textBaseline = "bottom";
         ctx.fillText(

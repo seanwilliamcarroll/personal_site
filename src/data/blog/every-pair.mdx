@@ -19,21 +19,21 @@ import Gravity from "@/components/demo/Gravity.astro";
 
 Every body pulls on every other with Newton's gravity, softened:
 
-```text
-F_ij = G m_i m_j r / (|r|² + ε²)^(3/2),     r = x_j − x_i
-```
+$$
+\mathbf F_{ij} = G\, m_i m_j \, \frac{\mathbf r}{\left(|\mathbf r|^2 + \varepsilon^2\right)^{3/2}}, \qquad \mathbf r = \mathbf x_j - \mathbf x_i
+$$
 
-- `G` is the gravitational constant, `m_i` and `m_j` the two masses,
-  `r` the vector from body i to body j.
-- `ε`, the **softening**, keeps two bodies passing close from getting an
-  enormous kick in one step and flinging apart: below about ε, the force
-  stops growing.
-- Each pair is computed once: the force on j is the force on i, reversed
-  (Newton's third law). For n bodies that's n(n − 1)/2 pairs: at 4,096
+- $G$ is the gravitational constant, $m_i$ and $m_j$ the two masses,
+  $\mathbf r$ the vector from body $i$ to body $j$.
+- $\varepsilon$, the **softening**, keeps two bodies passing close from getting an
+  enormous kick in one step and flinging apart: below about
+  $\varepsilon$, the force stops growing.
+- Each pair is computed once: the force on $j$ is the force on $i$, reversed
+  (Newton's third law). For $n$ bodies that's $n(n-1)/2$ pairs: at 4,096
   bodies, **8,386,560 pairs a step**, 60 steps a second.
 
-Per pair: a subtraction for `r`, a sum of squares, one **square root**,
-one **division**, and a few multiplies to scale `r` and add the result
+Per pair: a subtraction for $\mathbf r$, a sum of squares, one **square root**,
+one **division**, and a few multiplies to scale $\mathbf r$ and add the result
 to each body. The square root and division are the expensive part.
 
 > **TODO:** anything on the integrator (symplectic Euler, a fixed 60 Hz step) or the scene (a cluster of 4,096 bodies in a 2 m disc, f32).
