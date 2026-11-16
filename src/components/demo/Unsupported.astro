@@ -1,0 +1,23 @@
+---
+// A demo whose WebAssembly the browser can't run: its factory throws what
+// the physics-engine package's loader throws without WebAssembly SIMD (a
+// `WasmUnsupportedError`). It exists so the tests can see that error's
+// message shown in place of the usual one (tests/wrapper.spec.ts).
+import Demo from "./Demo.astro";
+---
+
+<Demo name="unsupported" label="A demo this browser can't run">
+  A demo this browser can't run.
+</Demo>
+
+<script>
+  import { registerDemo } from "./lifecycle";
+
+  registerDemo("unsupported", () => {
+    const err = new Error(
+      "This browser can't run engine.wasm: it doesn't support WebAssembly SIMD. Chrome 91, Firefox 89 and Safari 16.4 or later do."
+    );
+    err.name = "WasmUnsupportedError";
+    throw err;
+  });
+</script>

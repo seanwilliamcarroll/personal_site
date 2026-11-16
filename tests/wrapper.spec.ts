@@ -123,4 +123,21 @@ test.describe("a demo that can't start", () => {
     // The one expected error; anything else still fails the test.
     expect(consoleErrors.splice(0).join("\n")).toContain("broken on purpose");
   });
+
+  test("without WebAssembly SIMD, says so instead of suggesting a reload", async ({
+    page,
+    consoleErrors,
+  }) => {
+    await page.goto(FAILURE);
+    const wrapper = demo(page, "unsupported");
+    await wrapper.scrollIntoViewIfNeeded();
+    await expect(wrapper).toHaveAttribute("data-demo-state", "failed");
+    await expect(wrapper.locator("[data-demo-message]")).toHaveText(
+      "This browser can't run engine.wasm: it doesn't support WebAssembly SIMD. Chrome 91, Firefox 89 and Safari 16.4 or later do."
+    );
+    await expect(wrapper.locator("canvas")).toBeHidden();
+    // Both demos on the page fail on purpose; only those errors may show.
+    const errors = consoleErrors.splice(0).join("\n");
+    expect(errors).toContain("WebAssembly SIMD");
+  });
 });

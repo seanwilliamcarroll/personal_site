@@ -12,6 +12,19 @@
 // - Colours come from the site's theme and follow it when it changes.
 // - A failure replaces the canvas with a message, not a blank box.
 
+/** What the reader is told when a demo can't start. Usually that
+ *  reloading may help; but when the browser can't run the demo's
+ *  WebAssembly at all (the physics-engine package's
+ *  `WasmUnsupportedError`: no WebAssembly SIMD), reloading won't, and
+ *  that error's own message, written for the reader, says why. Matched
+ *  by name, so this file needn't depend on the package. */
+export function failureMessage(err: unknown): string {
+  if (err instanceof Error && err.name === "WasmUnsupportedError") {
+    return err.message;
+  }
+  return "This demo couldn't start. Reloading the page may help.";
+}
+
 /** The theme's colours, as CSS colour strings. */
 export interface Palette {
   background: string;
@@ -200,8 +213,7 @@ class Mount {
     console.error("demo: failed", err);
     if (this.#message) {
       this.#message.hidden = false;
-      this.#message.textContent =
-        "This demo couldn't start. Reloading the page may help.";
+      this.#message.textContent = failureMessage(err);
     }
     this.#canvas.hidden = true;
     if (this.#button) this.#button.hidden = true;
