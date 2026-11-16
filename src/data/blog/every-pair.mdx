@@ -8,6 +8,7 @@ tags:
 ---
 
 import Gravity from "@/components/demo/Gravity.astro";
+import SideBySide from "@/components/SideBySide.astro";
 
 <Gravity />
 
@@ -59,13 +60,23 @@ worth of numbers sit side by side, four pairs cost about what one did.
 
 > **TODO:** your thinking about vectorizing the code: what you expected, what was tried (the notebook, docs/gravity-vectorize.md in physics, has every step and dead end), and what surprised you.
 
-## The loop, before
+## The loop, before and after
 
-The hot loop as the compiler built it before: `f32`, Apple M4 (AArch64).
-**One pair per iteration.** The 2-wide vectors (`.2s`) hold only that
-pair's x and y; the square root and division are scalar (`fsqrt s16`,
-`fdiv s5`); and `fcmp s5, #0.0` / `b.eq` is a branch that skips two
-bodies sitting exactly on top of each other with no softening (0/0).
+The hot loop as the compiler built it, before and after: `f32` on an
+Apple M4 (AArch64). **Before**, one pair an iteration: the 2-wide vectors
+(`.2s`) hold only that pair's $x$ and $y$, the square root and division
+are scalar (`fsqrt s16`, `fdiv s5`), and `fcmp` / `b.eq` is a branch that
+skips two bodies exactly on top of each other with no softening (0/0).
+**After**, four pairs an iteration (`.4s`): four square roots and four
+divisions in one instruction each; the branch became a select (`fcmeq`
+and `bic` zero those pairs' force); `ld2` / `st2` split and rejoin the
+bodies' $x$ and $y$; and each pair's force is kept (`str`) for a second
+pass that adds body $i$'s sum in its 16 lanes.
+
+<SideBySide>
+<div>
+
+**Before:** one pair an iteration
 
 ```asm
 LBB193_57:
@@ -74,68 +85,68 @@ LBB193_57:
 	mov x16, x15
 	add x15, x15, #1
 	ldr d4, [x11, x17]
-	fsub.2s v4, v4, v1          ; r = x_j - x_i  (x and y)
+	fsub.2s v4, v4, v1      ; r
 	fmul.2s v5, v4, v4
-	faddp.2s s5, v5             ; |r|²
-	fadd s5, s9, s5             ; + ε²
+	faddp.2s s5, v5         ; |r|²
+	fadd s5, s9, s5         ; + ε²
 	add x17, x17, #16
-	fcmp s5, #0.0               ; coincident? skip the pair
-	b.eq LBB193_57
+	fcmp s5, #0.0           ; 0/0?
+	b.eq LBB193_57          ;   skip
 	add x17, x12, x16, lsl #4
 	ldp s7, s6, [x17, #8]
 	fmul s7, s3, s7
-	fsqrt s16, s5               ; one square root
+	fsqrt s16, s5           ; 1 sqrt
 	fmul s5, s5, s16
-	fdiv s5, s7, s5             ; one division
-	fmul.2s v4, v4, v5[0]       ; the force
+	fdiv s5, s7, s5         ; 1 div
+	fmul.2s v4, v4, v5[0]   ; force
 	fmul.2s v5, v4, v2[0]
-	fadd.2s v0, v0, v5          ; body i's sum, in order
+	fadd.2s v0, v0, v5      ; i's sum
 	fmul.2s v4, v4, v6[0]
 	ldr d5, [x13, x16, lsl #3]
 	fsub.2s v4, v5, v4
-	str d4, [x13, x16, lsl #3]  ; body j's share
+	str d4, [x13, x16, lsl #3] ; j's share
 	b LBB193_56
 ```
 
-## The loop, after
+</div>
+<div>
 
-The same work, **four pairs per iteration** (`.4s`): four square roots
-and four divisions in one instruction each. The branch became a select
-(`fcmeq` and `bic` zero the coincident pairs' force), `ld2` / `st2` split
-and rejoin the bodies' x and y, and each pair's force is kept (`str`) for
-a second pass that adds body i's sum in its 16 lanes.
+**After:** four pairs an iteration
 
 ```asm
 LBB95_8:
-	ldr q7, [x17], #16          ; four bodies' x
-	ldr q16, [x0], #16          ; four bodies' y
-	ldr q17, [x1], #16          ; four masses
-	ldr q18, [x3], #16          ; four inverse masses
-	fsub.4s v7, v7, v4          ; four r.x
-	fsub.4s v16, v16, v5        ; four r.y
+	ldr q7, [x17], #16      ; 4 x
+	ldr q16, [x0], #16      ; 4 y
+	ldr q17, [x1], #16      ; 4 masses
+	ldr q18, [x3], #16      ; 4 1/masses
+	fsub.4s v7, v7, v4      ; 4 r.x
+	fsub.4s v16, v16, v5    ; 4 r.y
 	fmul.4s v19, v7, v7
 	fmul.4s v20, v16, v16
-	fadd.4s v19, v19, v20       ; four |r|²
-	fadd.4s v19, v6, v19        ; + ε²
+	fadd.4s v19, v19, v20   ; 4 |r|²
+	fadd.4s v19, v6, v19    ; + ε²
 	fmul.4s v17, v17, v2[0]
-	fsqrt.4s v20, v19           ; four square roots
+	fsqrt.4s v20, v19       ; 4 sqrts
 	fmul.4s v20, v19, v20
-	fdiv.4s v17, v17, v20       ; four divisions
-	fcmeq.4s v19, v19, #0.0     ; coincident?
-	bic.16b v17, v17, v19       ;   then no force (a select, not a branch)
-	fmul.4s v7, v7, v17         ; four forces, x
-	fmul.4s v16, v16, v17       ; four forces, y
+	fdiv.4s v17, v17, v20   ; 4 divs
+	fcmeq.4s v19, v19, #0.0 ; 0/0?
+	bic.16b v17, v17, v19   ;   select
+	fmul.4s v7, v7, v17     ; 4 forces
+	fmul.4s v16, v16, v17
 	fmul.4s v17, v18, v7
-	ld2.4s { v19, v20 }, [x16]  ; four bodies' accelerations (x, y)
+	ld2.4s { v19, v20 }, [x16]
 	fsub.4s v21, v19, v17
 	fmul.4s v17, v18, v16
 	fsub.4s v22, v20, v17
-	st2.4s { v21, v22 }, [x16], #32  ; body j's share, four at once
-	str q7, [x4], #16           ; the forces, kept for body i's sum
-	str q16, [x5], #16
+	st2.4s { v21, v22 }, [x16], #32 ; j's
+	str q7, [x4], #16       ; kept for
+	str q16, [x5], #16      ;   i's sum
 	subs x6, x6, #4
 	b.ne LBB95_8
 ```
+
+</div>
+</SideBySide>
 
 > **TODO:** what changed in the source to get from one to the other (two passes; the branch as a select; the lanes; a function boundary so the compiler knows the arrays don't overlap).
 
