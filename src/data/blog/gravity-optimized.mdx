@@ -42,8 +42,6 @@ Per pair: a subtraction for $\mathbf r$, a sum of squares, one **square root**,
 one **division**, and a few multiplies to scale $\mathbf r$ and add the result
 to each body. The square root and division are the expensive part.
 
-> **TODO:** anything on the integrator (symplectic Euler, a fixed 60 Hz step) or the scene (a cluster of 4,096 bodies in a 2 m disc, f32).
-
 ### The technique: SIMD
 
 A CPU's vector (SIMD) instructions do the same operation on several
@@ -409,8 +407,6 @@ The largest cluster whose whole step fits in 10 ms (leaving room in a
 Before, on the M4, about 3,950 fit in either.
 
 > **TODO:** reading the numbers. Why Zen 5 gains so much more (its scalar square root and division were the bottleneck; the M4's are fast, so in f64 it had little to win), what AVX-512 shows, and WebAssembly within a few percent of native.
-
-> **TODO:** the Cranelift vs LLVM aside? (On the M4, one variant ran 1.7x faster as WebAssembly than natively: LLVM's ordered reductions, experiments/llvm-ordered-reductions in physics.)
 
 ## Wrapping up
 
