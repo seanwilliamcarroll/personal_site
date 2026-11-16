@@ -11,7 +11,7 @@ tags:
 import Gravity from "@/components/demo/Gravity.astro";
 import SideBySide from "@/components/SideBySide.astro";
 
-I've been interested in profiling and optimization for a few years now. I've done it a few times in professional code, though I've not really had the opportunity to do so lately. For the past several weeks, I've been having fun with Claude by building a [physics engine](https://github.com/seanwilliamcarroll/physics) from (mostly) vanilla Rust. The engine is all Rust, and I've had Claude wrap things in TypeScript when appropriate so I could display some visual demos on this site. I've written 0% of the code, all of it coming from Claude (mostly Opus 5.5, and some Fable 5.2 when I had the credit), but I've been managing the process. I've pushed for particular features, including gravity and collisions, acoustics in the form of physically simulating piano strings (an homage to a fun project from university), and some interesting demos of swarming behavior. All along, I'd been stopping my agent to do health checks of the codebase when I could: mutation testing with [cargo-mutants](https://mutants.rs), benchmarking with [criterion](https://github.com/bheisler/criterion.rs), property testing and so on, in addition to the normal unit testing and coverage collection. Recently, I finally took the time to pick a particular benchmark and see if I could improve things.
+I've been interested in profiling and optimization for a few years now. I've done it a few times in professional code, though I've not really had the opportunity to do so lately. For the past several weeks, I've been having fun with Claude by building a [physics engine](https://github.com/seanwilliamcarroll/physics) from (mostly) vanilla Rust. The engine is all Rust, and I've had Claude wrap things in TypeScript when appropriate so I could display some visual demos on this site. I've written 0% of the code, all of it coming from Claude (mostly Opus 5.5, and some Fable 5.2 when I had the credit), but I've been managing the process. I've pushed for particular features, including gravity and collisions, acoustics in the form of physically simulating piano strings (an homage to a fun project from university), and some interesting demos of swarming behavior. All along, I'd been stopping my agent to do health checks of the codebase when I could: mutation testing with [cargo-mutants](https://mutants.rs), benchmarking with [criterion](https://github.com/bheisler/criterion.rs), property testing with [proptest](https://github.com/proptest-rs/proptest) and so on, in addition to the normal unit testing and coverage collection. Recently, I finally took the time to pick a particular benchmark and see if I could improve things.
 
 The following post describes what my agent and I did. I was primarily inspired by Casey Muratori's lecture [_Simple Code, High Performance_](https://www.youtube.com/watch?v=Ge3aKEmZcqY), which prompted me to examine the assembly of some hot loops to see if I could get them to vectorize better.
 
@@ -49,6 +49,17 @@ to each body. The square root and division are the expensive part.
 A CPU's vector (SIMD) instructions do the same operation on several
 numbers at once: one `fsqrt.4s` takes four square roots. If four pairs'
 worth of numbers sit side by side, four pairs cost about what one did.
+
+Unless a section says otherwise, everything here ran on my laptop, an
+Apple M4, and the assembly is **AArch64** (64-bit ARM) with its **NEON**
+vector instructions: 32 registers of 128 bits, `v0` to `v31`. A suffix
+says how a register is split into lanes: `.4s` is four 32-bit floats
+(`f32`), `.2s` two, `.2d` two 64-bit floats (`f64`); a bare `s5` or `d5`
+is one scalar float, the lowest lane of `v5`. The listings use Apple's assembler
+syntax, which puts the lane shape on the instruction (`fsqrt.4s v20,
+v19`) where ARM's standard syntax puts it on the registers (`fsqrt
+v20.4s, v19.4s`). The benchmarks also include an AMD Zen 5 (x86-64) and
+WebAssembly, and say so.
 
 - Vector width depends on the hardware: 128 bits (four `f32`) on ARM's
   NEON, in WebAssembly's `simd128` and in baseline x86-64; 256 bits with
