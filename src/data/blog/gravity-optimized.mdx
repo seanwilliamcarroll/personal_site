@@ -458,7 +458,12 @@ default build for the machine's baseline instruction set; "AVX2" and
   ]}
 />
 
-> **TODO:** reading the numbers. Why Zen 5 gains so much more (its scalar square root and division were the bottleneck; the M4's are fast, so in f64 it had little to win), what AVX-512 shows, and WebAssembly within a few percent of native.
+Zen 5 gains far more than the M4: its scalar square root and division
+were the bottleneck, and vectors spread that cost over four lanes, where
+the M4's are fast enough that in `f64` there was little left to win.
+Wider vectors keep paying on Zen 5, down to a fifth of the time with
+AVX-512. And with `simd128` on, WebAssembly runs within a few percent of
+native.
 
 ## Wrapping up
 
