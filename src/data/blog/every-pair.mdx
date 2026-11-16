@@ -1,18 +1,23 @@
 ---
-title: "Every pair, every frame"
+title: "AI-Assisted Performance Optimization"
 description: "Vectorizing my physics engine's n-body gravity loop: 4,096 bodies, 8.4 million pairs a step, in the browser."
 pubDatetime: 2026-11-16T12:00:00-05:00
 draft: true
 tags:
   - physics
+  - performance
 ---
 
 import Gravity from "@/components/demo/Gravity.astro";
 import SideBySide from "@/components/SideBySide.astro";
 
+I've been interested in profiling and optimization for a few years now. I've done it a few times in professional code, though I've not really had the opportunity to do so lately. For the past several weeks, I've been having fun with Claude by building a physics engine from (mostly) vanilla Rust. The engine lives there and then I've had Claude wrap things in TypeScript when appropriate so I could display some visual demos on this site. I've written 0% of the code, all of it coming from Claude Opus 5.5 (and some from Fable 5.2 when I had the credit), but I've been managing the process. I've pushed for particular features, including gravity and collisions, acoustics in the form of physically simulating piano strings (an homage to a fun project from university), and some interesting swarming behvaior-related demos. All along, I'd been stopping my agent to do health checks of the codebase when I could: using cargo mutants, benchmarking with criterion, property testing, etc. in addition to the normal unit testing and coverage collection. I finally took the time now to pick a particular benchmark and see if I could improve things.
+
+The following post describes what I and my agent did. I was primarily inspired by Casey Muratori's Simple Code, High Performance lecture, prompting me to examine assembly for some hot loops to see if I could get things to vectorize better.
+
 <Gravity />
 
-> **TODO:** the hook. What the reader is looking at: 4,096 bodies, each pulling on every other, every step; the number at the bottom is the time one step takes in your browser.
+The problem in question is calculating the forces of gravity on N discrete bodies.
 
 ## Background
 
