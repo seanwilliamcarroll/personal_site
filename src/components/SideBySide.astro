@@ -1,0 +1,39 @@
+---
+// Two things to compare, side by side: two columns on a wide screen,
+// wider than the text column so two code listings fit; one above the
+// other on a narrow one. In MDX, each child is a <div> holding Markdown
+// (a heading or caption, then a fenced code block), with blank lines
+// around the Markdown.
+---
+
+<div class="side-by-side">
+  <slot />
+</div>
+
+<style>
+  .side-by-side {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  @media (min-width: 64rem) {
+    .side-by-side {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      /* Wider than the 48 rem text column, centred on it. */
+      width: min(72rem, calc(100vw - 2rem));
+      position: relative;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+
+  /* Each side may be narrower than its longest line: it scrolls. */
+  .side-by-side > :global(*) {
+    min-width: 0;
+  }
+
+  .side-by-side :global(pre) {
+    margin-top: 0.5rem;
+  }
+</style>

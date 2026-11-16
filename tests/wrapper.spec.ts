@@ -12,8 +12,8 @@ import {
   test,
 } from "./fixtures";
 
-const CHECK = "/posts/demo-wrapper-check/";
-const FAILURE = "/posts/demo-failure-check/";
+const CHECK = "/checks/demo-wrapper/";
+const FAILURE = "/checks/demo-failure/";
 
 test.describe("the wrapper", () => {
   test.beforeEach(async ({ page }) => {

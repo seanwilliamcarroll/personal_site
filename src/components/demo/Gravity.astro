@@ -1,0 +1,97 @@
+---
+// The engine's n-body cluster at 4,096 bodies: every pair's gravity,
+// every step (8.4 million pairs), with the step's measured time shown.
+// The demo for the post on vectorizing the pair loop.
+import Demo from "./Demo.astro";
+---
+
+<Demo
+  name="gravity"
+  aspect="4 / 3"
+  label="A cluster of 4,096 bodies collapsing and swirling under their own gravity"
+>
+  <slot>
+    4,096 bodies under their own gravity: every pair, every step, at 60 Hz.
+  </slot>
+</Demo>
+
+<script>
+  import wasmUrl from "physics-engine/engine.wasm?url";
+  import { registerDemo } from "./lifecycle";
+  import type { Demo, FrameInfo } from "./lifecycle";
+
+  const BODIES = 4096;
+  const PAIRS = (BODIES * (BODIES - 1)) / 2;
+  const SEED = 1;
+  /** The part of the world shown, m: the cluster starts within 2 m of
+   *  the centre (`scenarios::CLUSTER_RADIUS`), and most of it stays
+   *  within 3. */
+  const HALF_HEIGHT_M = 3;
+  /** A body's drawn size, CSS px (they are points in the engine). */
+  const DOT_PX = 1.5;
+  /** Smoothing of the shown step time: each new step weighs this much. */
+  const SMOOTHING = 0.05;
+
+  registerDemo("gravity", async (canvas): Promise<Demo> => {
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("no 2D canvas");
+    const { loadEngine, positionsView, DEMO_CLUSTER, SCALAR_F32 } =
+      await import("physics-engine");
+    const { engine, lastPanic } = await loadEngine(wasmUrl);
+    const demo = engine.demo_new(DEMO_CLUSTER, SCALAR_F32, BODIES, SEED);
+    if (!demo) throw new Error(lastPanic() ?? "the engine refused the scene");
+    // At most one step a frame: a device too slow for 4,096 bodies plays
+    // the cluster in slow motion instead of falling ever further behind.
+    engine.demo_set_step_cap(demo, 1);
+
+    /** A step's time, ms, smoothed; NaN until the first step. */
+    let stepMs = Number.NaN;
+
+    return {
+      frame(dt: number, { colors, width, height, dpr }: FrameInfo) {
+        if (dt > 0) {
+          const t0 = performance.now();
+          const steps = engine.demo_advance(demo, dt);
+          if (steps > 0) {
+            const ms = (performance.now() - t0) / steps;
+            stepMs = Number.isNaN(stepMs)
+              ? ms
+              : stepMs + SMOOTHING * (ms - stepMs);
+          }
+        }
+
+        const scale = height / (2 * HALF_HEIGHT_M);
+        const originX = width / 2;
+        const originY = height / 2;
+        ctx.fillStyle = colors.background;
+        ctx.fillRect(0, 0, width, height);
+
+        // [x0, y0, x1, y1, …] in metres; a fresh view every frame.
+        const xy = positionsView(engine, demo);
+        const dot = Math.max(1, DOT_PX * dpr);
+        ctx.fillStyle = colors.accent;
+        for (let i = 0; i + 1 < xy.length; i += 2) {
+          const x = originX + (xy[i] ?? 0) * scale;
+          const y = originY - (xy[i + 1] ?? 0) * scale;
+          ctx.fillRect(x - dot / 2, y - dot / 2, dot, dot);
+        }
+
+        const pairs = `${(PAIRS / 1e6).toFixed(1)} million pairs`;
+        const time = Number.isNaN(stepMs)
+          ? ""
+          : ` · a step in ${stepMs.toFixed(1)} ms`;
+        ctx.fillStyle = colors.foreground;
+        ctx.font = `${12 * dpr}px ui-monospace, monospace`;
+        ctx.textBaseline = "bottom";
+        ctx.fillText(
+          `${BODIES.toLocaleString("en-US")} bodies · ${pairs}${time}`,
+          8 * dpr,
+          height - 6 * dpr
+        );
+      },
+      dispose() {
+        engine.demo_free(demo);
+      },
+    };
+  });
+</script>

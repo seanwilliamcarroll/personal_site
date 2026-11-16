@@ -3,7 +3,7 @@
 // from the site itself (the fixtures refuse any other).
 import { expect, test } from "./fixtures";
 
-const PAGE = "/posts/math-check/";
+const PAGE = "/checks/math/";
 
 test("inline and display math render, in KaTeX's fonts, from the site", async ({
   page,

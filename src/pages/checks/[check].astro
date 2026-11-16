@@ -1,0 +1,48 @@
+---
+// Test pages for the browser tests (tests/): a demo the wrapper is
+// exercised on, demos that fail to start, math. Not posts: they live in
+// src/checks/, outside the blog's collection, so no list, tag, feed or
+// search ever has them. And they are built only with
+// PUBLIC_SHOW_DRAFTS=true (`npm run build:demos`, what the tests run on):
+// a production build has none. Rendered like a post's body: the site's
+// layout and header (theme switching, the link home the tests navigate
+// by), a post-style article, KaTeX's styles.
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import { SHOW_DRAFTS } from "@/utils/drafts";
+import "katex/dist/katex.min.css";
+
+interface CheckPage {
+  default: (props: Record<string, unknown>) => unknown;
+  frontmatter: { title: string };
+}
+
+export function getStaticPaths() {
+  if (!SHOW_DRAFTS) return [];
+  const pages = import.meta.glob<CheckPage>("../../checks/*.mdx", {
+    eager: true,
+  });
+  return Object.entries(pages).map(([path, page]) => ({
+    params: { check: path.replace(/^.*\/|\.mdx$/g, "") },
+    props: { page },
+  }));
+}
+
+const { page } = Astro.props as { page: CheckPage };
+const Content = page.default;
+---
+
+<Layout title={page.frontmatter.title}>
+  <Header />
+  <main id="main-content" class="app-layout mt-8 pb-12">
+    <h1 class="text-2xl font-semibold">{page.frontmatter.title}</h1>
+    <article
+      id="article"
+      class="app-prose mt-8 w-full max-w-app prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"
+    >
+      <Content />
+    </article>
+  </main>
+  <Footer />
+</Layout>

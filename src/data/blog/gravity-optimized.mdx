@@ -1,0 +1,470 @@
+---
+title: "AI-Assisted Performance Optimization"
+description: "Vectorizing my physics engine's n-body gravity loop: 4,096 bodies, 8.4 million pairs a step, in the browser."
+pubDatetime: 2026-11-16T14:30:00-05:00
+draft: false
+tags:
+  - physics
+  - performance
+---
+
+import Gravity from "@/components/demo/Gravity.astro";
+import SideBySide from "@/components/SideBySide.astro";
+import BenchmarkBars from "@/components/BenchmarkBars.astro";
+
+I've been interested in profiling and optimization for a few years now. I've done it a few times in professional code, though I've not really had the opportunity to do so lately. For the past several weeks, I've been having fun with Claude by building a [physics engine](https://github.com/seanwilliamcarroll/physics) from (mostly) vanilla Rust. The engine is all Rust, and I've had Claude wrap things in TypeScript when appropriate so I could display some visual demos on this site. I've written 0% of the code, all of it coming from Claude (mostly Opus 5.5, and some Fable 5.2 when I had the credit), but I've been managing the process. I've pushed for particular features, including gravity and collisions, acoustics in the form of physically simulating piano strings (an homage to a fun project from university), and some interesting demos of swarming behavior. All along, I'd been stopping my agent to do health checks of the codebase when I could: mutation testing with [cargo-mutants](https://mutants.rs), benchmarking with [criterion](https://github.com/bheisler/criterion.rs), property testing with [proptest](https://github.com/proptest-rs/proptest) and so on, in addition to the normal unit testing and coverage collection. Recently, I finally took the time to pick a particular benchmark and see if I could improve things.
+
+The following post describes what my agent and I did. I was primarily inspired by Casey Muratori's lecture [_Simple Code, High Performance_](https://www.youtube.com/watch?v=Ge3aKEmZcqY), which prompted me to examine the assembly of some hot loops to see if I could get them to vectorize better.
+
+<Gravity />
+
+The problem in question is calculating the forces of gravity between $n$ discrete bodies.
+
+## Background
+
+### The force
+
+Every body pulls on every other with Newton's gravity, softened:
+
+$$
+\mathbf F_{ij} = G\, m_i m_j \, \frac{\mathbf r}{\left(|\mathbf r|^2 + \varepsilon^2\right)^{3/2}}, \qquad \mathbf r = \mathbf x_j - \mathbf x_i
+$$
+
+- $G$ is the gravitational constant, $m_i$ and $m_j$ the two masses,
+  $\mathbf r$ the vector from body $i$ to body $j$.
+- $\varepsilon$, the **softening**, keeps two bodies passing close from getting an
+  enormous kick in one step and flinging apart: below about
+  $\varepsilon$, the force stops growing.
+- Each pair is computed once: the force on $j$ is the force on $i$, reversed
+  (Newton's third law). For $n$ bodies that's $n(n-1)/2$ pairs: at 4,096
+  bodies, **8,386,560 pairs a step**, 60 steps a second.
+
+Per pair: a subtraction for $\mathbf r$, a sum of squares, one **square root**,
+one **division**, and a few multiplies to scale $\mathbf r$ and add the result
+to each body. The square root and division are the expensive part.
+
+### The technique: SIMD
+
+A CPU's vector (SIMD) instructions do the same operation on several
+numbers at once: one `fsqrt.4s` takes four square roots. If four pairs'
+worth of numbers sit side by side, four pairs cost about what one did.
+
+Unless a section says otherwise, everything here ran on my laptop, an
+Apple M4, and the assembly is **AArch64** (64-bit ARM) with its **NEON**
+vector instructions: 32 registers of 128 bits, `v0` to `v31`. A suffix
+says how a register is split into lanes: `.4s` is four 32-bit floats
+(`f32`), `.2s` two, `.2d` two 64-bit floats (`f64`); a bare `s5` or `d5`
+is one scalar float, the lowest lane of `v5`. The listings use Apple's assembler
+syntax, which puts the lane shape on the instruction (`fsqrt.4s v20,
+v19`) where ARM's standard syntax puts it on the registers (`fsqrt
+v20.4s, v19.4s`). The benchmarks also include an AMD Zen 5 (x86-64) and
+WebAssembly, and say so.
+
+- Vector width depends on the hardware: 128 bits (four `f32`) on ARM's
+  NEON, in WebAssembly's `simd128` and in baseline x86-64; 256 bits with
+  AVX2; 512 with AVX-512.
+- The compiler does the vectorizing (no intrinsics here); the work is
+  arranging the loop so it can.
+- **The catch: the sum.** Body $i$'s total force is a sum over every
+  other body. Floating-point addition isn't associative, so adding in a
+  different order gives different last bits, and the compiler won't
+  reorder it on its own. The engine's results must be bit-identical
+  natively and in WebAssembly, so the new order is written into the
+  source: body $i$'s sum is kept in 16 partial sums ("lanes"), added
+  together in a fixed order at the end.
+
+### The path we took
+
+The short version, in order (on the M4 unless noted; every step and
+number is in the notebook):
+
+- **Read the assembly.** One pair an iteration, a scalar square root and
+  division, and body $i$'s sum stored to memory and reloaded every pair.
+- **Body $i$'s sum in a register:** 33–51% less time, the same bits. Kept.
+- **Masses stored next to inverse masses** (no copy per call): up to 70%
+  slower. Dropped.
+- **Separate $x$ and $y$ arrays alone:** not vectorized, slower.
+- **The 0/0 branch as a select:** vectorized, but the in-order sum
+  serialized it: `f32` faster, `f64` slower.
+- **Two passes, body $i$'s sum in lanes:** `f32` 32–40% less time, `f64`
+  still slower on the M4; the compiler needed a function boundary to know
+  the arrays don't overlap.
+- **One pass, in blocks:** clean vector code, and no faster. The visible
+  problem wasn't the bottleneck.
+- **The same on Zen 5 and in WebAssembly:** Zen 5's scalar square root
+  and division are slow, so vectors win big there; two passes scale with
+  the vector width (a fifth of the time with AVX-512).
+- **Lane counts swept for both:** two passes and 16 lanes, the best
+  overall, went into the engine.
+
+## The loop, before and after
+
+The engine's pairwise gravity before this work and as it is now, in
+three parts. The code is the engine's, lightly edited (shorter comments,
+some lines wrapped, a slice or two written the short way).
+
+**The loop over bodies.** Before, the bodies were copied into one array
+of `(position, mass, inverse mass)` and the loop went body by body, the
+pair loop nested inside. Now the copy is one array per quantity, and
+each body takes two passes: pass one over every later body, pass two
+adding up body $i$'s force.
+
+<SideBySide>
+<div>
+
+**Before**
+
+```rust
+// Masses once per call: n divisions,
+// not n² in the pair loop.
+let bodies: Vec<(Vec2<S>, S, S)> = p
+    .pos()
+    .iter()
+    .zip(p.inv_mass())
+    .map(|(&x, &w)| {
+        let m = if w == S::ZERO { S::ZERO }
+                else { S::ONE / w };
+        (x, m, w)
+    })
+    .collect();
+
+// Each pair once: body i, then every
+// later body j.
+let mut acc_rest = acc;
+let mut body_rest = bodies.as_slice();
+while let (
+    Some((a_i, acc_tail)),
+    Some((&(x_i, m_i, w_i), body_tail)),
+) = (
+    mem::take(&mut acc_rest).split_first_mut(),
+    body_rest.split_first(),
+) {
+    // the pair loop, adding into sum_i
+    // (next)
+    acc_rest = acc_tail;
+    body_rest = body_tail;
+}
+```
+
+</div>
+<div>
+
+**After**
+
+```rust
+// One array per quantity: x, y, mass,
+// inverse mass (Bodies::of).
+let n = b.x.len();
+// Each pair's force on body i, for pass two.
+let (mut fx, mut fy) =
+    (vec![S::ZERO; n], vec![S::ZERO; n]);
+
+let mut acc_rest = acc;
+let (mut x_rest, mut y_rest, mut m_rest, mut w_rest) =
+    (&b.x[..], &b.y[..], &b.m[..], &b.w[..]);
+while let (
+    Some((a_i, acc_tail)),
+    Some((&px_i, x_tail)),
+    Some((&py_i, y_tail)),
+    Some((&m_i, m_tail)),
+    Some((&w_i, w_tail)),
+) = (
+    mem::take(&mut acc_rest).split_first_mut(),
+    x_rest.split_first(),
+    y_rest.split_first(),
+    m_rest.split_first(),
+    w_rest.split_first(),
+) {
+    // pass one: every later body
+    pass_one(
+        (px_i, py_i, g_const * m_i, eps_sq),
+        (x_tail, y_tail, m_tail, w_tail),
+        acc_tail,
+        (&mut fx, &mut fy),
+    );
+    // pass two: body i's sum, in 16 lanes
+    let len = acc_tail.len();
+    let sum_x = lane_sum(&fx[..len]);
+    let sum_y = lane_sum(&fy[..len]);
+    *a_i += Vec2::new(sum_x, sum_y) * w_i;
+    acc_rest = acc_tail;
+    (x_rest, y_rest, m_rest, w_rest) =
+        (x_tail, y_tail, m_tail, w_tail);
+}
+```
+
+</div>
+</SideBySide>
+
+**The pair loop.** Before, one pair at a time, body $i$'s sum added in
+order, and a branch for the 0/0 case. Now, pass one: every pair's force
+for body $i$ with nothing summed across pairs (so the compiler can do
+four at once), the branch a select, each force kept in `fx` / `fy`.
+
+<SideBySide>
+<div>
+
+**Before**
+
+```rust
+let mut sum_i = *a_i;
+for (a_j, &(x_j, m_j, w_j)) in
+    acc_tail.iter_mut().zip(body_tail)
+{
+    let r = x_j - x_i;
+    let d_sq = r.length_sq() + softening_sq;
+    if d_sq == S::ZERO {
+        continue; // coincident: skip, not 0/0
+    }
+    let f = r * (g_const * m_i * m_j
+        / (d_sq * d_sq.sqrt()));
+    sum_i += f * w_i; // body i, in order
+    *a_j -= f * w_j; // body j
+}
+*a_i = sum_i;
+```
+
+</div>
+<div>
+
+**After:** `pass_one`
+
+```rust
+let others = xs.iter().zip(ys).zip(ms).zip(ws);
+let kept = fx.iter_mut().zip(fy.iter_mut());
+for ((a_j, (((&px_j, &py_j), &m_j), &w_j)),
+     (fx_j, fy_j)) in acc.iter_mut().zip(others).zip(kept)
+{
+    let (rx, ry) = (px_j - px_i, py_j - py_i);
+    let d_sq = rx * rx + ry * ry + eps_sq;
+    let s = g_mi * m_j / (d_sq * d_sq.sqrt());
+    // coincident: 0/0, selected away (no branch)
+    let s = if d_sq == S::ZERO { S::ZERO } else { s };
+    let (f_x, f_y) = (rx * s, ry * s);
+    a_j.x -= f_x * w_j; // body j
+    a_j.y -= f_y * w_j;
+    (*fx_j, *fy_j) = (f_x, f_y); // kept for body i
+}
+```
+
+</div>
+</SideBySide>
+
+**Body $i$'s sum.** Before, one running total, one add per pair, in
+order: each add waits for the last. Now, 16 running totals (pair $j$ in
+lane $j \bmod 16$), added together at the end as a tree, halves first.
+The order is written in the source, so every target, vector or not, gives
+the same bits.
+
+<SideBySide>
+<div>
+
+**Before**
+
+```rust
+// In the pair loop, one add per pair:
+sum_i += f * w_i;
+// …and after it:
+*a_i = sum_i;
+```
+
+</div>
+<div>
+
+**After:** `lane_sum`, `lane_total`
+
+```rust
+fn lane_sum<S: Scalar>(values: &[S]) -> S {
+    let mut lanes = [S::ZERO; LANES]; // 16
+    let (chunks, rest) = values.as_chunks::<LANES>();
+    for chunk in chunks {
+        for (lane, &v) in lanes.iter_mut().zip(chunk) {
+            *lane += v;
+        }
+    }
+    for (lane, &v) in lanes.iter_mut().zip(rest) {
+        *lane += v;
+    }
+    lane_total(&lanes)
+}
+
+/// (l0 + l1) + (l2 + l3), … level by level.
+fn lane_total<S: Scalar>(lanes: &[S; LANES]) -> S {
+    let mut level = *lanes;
+    let mut width = LANES;
+    while width > 1 {
+        width /= 2;
+        let mut next = [S::ZERO; LANES];
+        let (pairs, _) = level.as_chunks::<2>();
+        for (sum, &[a, b]) in
+            next.iter_mut().zip(pairs).take(width)
+        {
+            *sum = a + b;
+        }
+        level = next;
+    }
+    let [total, ..] = level;
+    total
+}
+```
+
+</div>
+</SideBySide>
+
+### The pair loop in assembly
+
+The pair loops as the compiler built them, `f32` on an Apple M4
+(AArch64). **Before**, one pair an iteration: the 2-wide vectors
+(`.2s`) hold only that pair's $x$ and $y$, the square root and division
+are scalar (`fsqrt s16`, `fdiv s5`), and `fcmp` / `b.eq` is a branch that
+skips two bodies exactly on top of each other with no softening (0/0).
+**After**, four pairs an iteration (`.4s`): four square roots and four
+divisions in one instruction each; the branch became a select (`fcmeq`
+and `bic` zero those pairs' force); `ld2` / `st2` split and rejoin the
+bodies' $x$ and $y$; and each pair's force is kept (`str`) for a second
+pass that adds body $i$'s sum in its 16 lanes.
+
+<SideBySide>
+<div>
+
+**Before:** one pair an iteration
+
+```asm
+LBB193_57:
+	cmp x1, x15
+	b.eq LBB193_53
+	mov x16, x15
+	add x15, x15, #1
+	ldr d4, [x11, x17]
+	fsub.2s v4, v4, v1      ; r
+	fmul.2s v5, v4, v4
+	faddp.2s s5, v5         ; |r|²
+	fadd s5, s9, s5         ; + ε²
+	add x17, x17, #16
+	fcmp s5, #0.0           ; 0/0?
+	b.eq LBB193_57          ;   skip
+	add x17, x12, x16, lsl #4
+	ldp s7, s6, [x17, #8]
+	fmul s7, s3, s7
+	fsqrt s16, s5           ; 1 sqrt
+	fmul s5, s5, s16
+	fdiv s5, s7, s5         ; 1 div
+	fmul.2s v4, v4, v5[0]   ; force
+	fmul.2s v5, v4, v2[0]
+	fadd.2s v0, v0, v5      ; i's sum
+	fmul.2s v4, v4, v6[0]
+	ldr d5, [x13, x16, lsl #3]
+	fsub.2s v4, v5, v4
+	str d4, [x13, x16, lsl #3] ; j's share
+	b LBB193_56
+```
+
+</div>
+<div>
+
+**After:** four pairs an iteration
+
+```asm
+LBB95_8:
+	ldr q7, [x17], #16      ; 4 x
+	ldr q16, [x0], #16      ; 4 y
+	ldr q17, [x1], #16      ; 4 masses
+	ldr q18, [x3], #16      ; 4 1/masses
+	fsub.4s v7, v7, v4      ; 4 r.x
+	fsub.4s v16, v16, v5    ; 4 r.y
+	fmul.4s v19, v7, v7
+	fmul.4s v20, v16, v16
+	fadd.4s v19, v19, v20   ; 4 |r|²
+	fadd.4s v19, v6, v19    ; + ε²
+	fmul.4s v17, v17, v2[0]
+	fsqrt.4s v20, v19       ; 4 sqrts
+	fmul.4s v20, v19, v20
+	fdiv.4s v17, v17, v20   ; 4 divs
+	fcmeq.4s v19, v19, #0.0 ; 0/0?
+	bic.16b v17, v17, v19   ;   select
+	fmul.4s v7, v7, v17     ; 4 forces
+	fmul.4s v16, v16, v17
+	fmul.4s v17, v18, v7
+	ld2.4s { v19, v20 }, [x16]
+	fsub.4s v21, v19, v17
+	fmul.4s v17, v18, v16
+	fsub.4s v22, v20, v17
+	st2.4s { v21, v22 }, [x16], #32 ; j's
+	str q7, [x4], #16       ; kept for
+	str q16, [x5], #16      ;   i's sum
+	subs x6, x6, #4
+	b.ne LBB95_8
+```
+
+</div>
+</SideBySide>
+
+### What changed in the source
+
+Four things got the compiler from the left-hand loop to the right:
+
+- **Two passes.** Pass one sums nothing across pairs, so each pair is
+  independent and four fit in one instruction; pass two does body $i$'s
+  sum on its own.
+- **Separate arrays.** One array per quantity ($x$, $y$, mass, inverse
+  mass), so a vector load picks up the same quantity for four bodies.
+- **A select for the branch.** `if d_sq == 0 { 0 } else { s }` computes
+  every lane and zeroes the 0/0 ones, where `continue` stopped the
+  vectorizer.
+- **A function boundary.** Pass one is its own function, so its arrays
+  are parameters, and Rust promises the compiler that `&mut` parameters
+  don't overlap. Written inline, the compiler checked for overlap at run
+  time and took its scalar path: twice as slow.
+
+## Benchmarks
+
+4,096 bodies, one call of the gravity loop (8.4 million pairs), before
+and after, on an AMD Ryzen 7 9700X (Zen 5) and the M4. "Native" is a
+default build for the machine's baseline instruction set; "AVX2" and
+"AVX-512" are native builds allowed to use those wider vectors.
+"wasmtime" and "V8" are the same Rust compiled to WebAssembly with
+`simd128`, run by wasmtime or by V8 (Chrome's engine, in Node).
+
+<BenchmarkBars
+  unit="ms"
+  summary="the gravity loop at 4,096 bodies, before and after, per machine and build"
+  panels={[
+    {
+      title: "f32",
+      rows: [
+        { label: "Zen 5, native", before: 13.42, after: 4.68 },
+        { label: "Zen 5, AVX2", before: 13.16, after: 2.79 },
+        { label: "Zen 5, AVX-512", before: 13.14, after: 1.58 },
+        { label: "Zen 5, wasmtime", before: 14.35, after: 4.67 },
+        { label: "Zen 5, V8", before: 22.23, after: 4.72 },
+        { label: "M4, native", before: 8.77, after: 4.28 },
+        { label: "M4, wasmtime", before: 10.52, after: 4.43 },
+        { label: "M4, V8", before: 10.55, after: 4.33 },
+      ],
+    },
+    {
+      title: "f64",
+      rows: [
+        { label: "Zen 5, native", before: 18.74, after: 10.88 },
+        { label: "Zen 5, AVX2", before: 18.7, after: 6.67 },
+        { label: "Zen 5, AVX-512", before: 18.75, after: 3.2 },
+        { label: "Zen 5, wasmtime", before: 18.72, after: 10.92 },
+        { label: "Zen 5, V8", before: 18.72, after: 10.88 },
+        { label: "M4, native", before: 8.72, after: 8.61 },
+        { label: "M4, wasmtime", before: 9.82, after: 8.71 },
+        { label: "M4, V8", before: 10.65, after: 8.3 },
+      ],
+    },
+  ]}
+/>
+
+Zen 5 gains far more than the M4: its scalar square root and division
+were the bottleneck, and vectors spread that cost over four lanes, where
+the M4's are fast enough that in `f64` there was little left to win.
+Wider vectors keep paying on Zen 5, down to a fifth of the time with
+AVX-512. And with `simd128` on, WebAssembly runs within a few percent of
+native.
+
+The engine, the experiments and every number here:
+[physics](https://github.com/seanwilliamcarroll/physics) (the notebook is
+`docs/gravity-vectorize.md`).

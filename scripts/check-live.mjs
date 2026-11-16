@@ -14,7 +14,7 @@
 
 const SITE = process.argv[2] ?? "https://www.seanwilliamcarroll.com";
 /** Published pages that embed a demo running WebAssembly. */
-const DEMO_PAGES = ["/posts/hello-particles/"];
+const DEMO_PAGES = ["/posts/hello-particles/", "/posts/gravity-optimized/"];
 const pages = process.argv.length > 3 ? process.argv.slice(3) : DEMO_PAGES;
 const WASM_MAGIC = [0x00, 0x61, 0x73, 0x6d];
 
