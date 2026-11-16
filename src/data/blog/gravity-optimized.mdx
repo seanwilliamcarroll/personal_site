@@ -72,7 +72,29 @@ WebAssembly, and say so.
   source: body $i$'s sum is kept in 16 partial sums ("lanes"), added
   together in a fixed order at the end.
 
-> **TODO:** your thinking about vectorizing the code: what you expected, what was tried (the notebook, docs/gravity-vectorize.md in physics, has every step and dead end), and what surprised you.
+### The path we took
+
+The short version, in order (on the M4 unless noted; every step and
+number is in the notebook):
+
+- **Read the assembly.** One pair an iteration, a scalar square root and
+  division, and body $i$'s sum stored to memory and reloaded every pair.
+- **Body $i$'s sum in a register:** 33–51% less time, the same bits. Kept.
+- **Masses stored next to inverse masses** (no copy per call): up to 70%
+  slower. Dropped.
+- **Separate $x$ and $y$ arrays alone:** not vectorized, slower.
+- **The 0/0 branch as a select:** vectorized, but the in-order sum
+  serialized it: `f32` faster, `f64` slower.
+- **Two passes, body $i$'s sum in lanes:** `f32` 32–40% less time, `f64`
+  still slower on the M4; the compiler needed a function boundary to know
+  the arrays don't overlap.
+- **One pass, in blocks:** clean vector code, and no faster. The visible
+  problem wasn't the bottleneck.
+- **The same on Zen 5 and in WebAssembly:** Zen 5's scalar square root
+  and division are slow, so vectors win big there; two passes scale with
+  the vector width (a fifth of the time with AVX-512).
+- **Lane counts swept for both:** two passes and 16 lanes, the best
+  overall, went into the engine.
 
 ## The loop, before and after
 
