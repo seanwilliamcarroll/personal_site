@@ -62,12 +62,107 @@ worth of numbers sit side by side, four pairs cost about what one did.
 
 ## The loop, before and after
 
-In Rust first. **Before**, the pair loop as it was: one pair at a time,
-body $i$'s sum added in order, and a branch for the 0/0 case. **After**,
-the first of two passes: every pair's force for body $i$, nothing summed
-across pairs (so the compiler can do four at once), the branch a select,
-and each force kept in `fx` / `fy`. A second pass then adds those up in
-16 partial sums, in a fixed order.
+The engine's pairwise gravity before this work and as it is now, in
+three parts. The code is the engine's, lightly edited (shorter comments,
+some lines wrapped, a slice or two written the short way).
+
+**The loop over bodies.** Before, the bodies were copied into one array
+of `(position, mass, inverse mass)` and the loop went body by body, the
+pair loop nested inside. Now the copy is one array per quantity, and
+each body takes two passes: pass one over every later body, pass two
+adding up body $i$'s force.
+
+<SideBySide>
+<div>
+
+**Before**
+
+```rust
+// Masses once per call: n divisions,
+// not n² in the pair loop.
+let bodies: Vec<(Vec2<S>, S, S)> = p
+    .pos()
+    .iter()
+    .zip(p.inv_mass())
+    .map(|(&x, &w)| {
+        let m = if w == S::ZERO { S::ZERO }
+                else { S::ONE / w };
+        (x, m, w)
+    })
+    .collect();
+
+// Each pair once: body i, then every
+// later body j.
+let mut acc_rest = acc;
+let mut body_rest = bodies.as_slice();
+while let (
+    Some((a_i, acc_tail)),
+    Some((&(x_i, m_i, w_i), body_tail)),
+) = (
+    mem::take(&mut acc_rest).split_first_mut(),
+    body_rest.split_first(),
+) {
+    // the pair loop, adding into sum_i
+    // (next)
+    acc_rest = acc_tail;
+    body_rest = body_tail;
+}
+```
+
+</div>
+<div>
+
+**After**
+
+```rust
+// One array per quantity: x, y, mass,
+// inverse mass (Bodies::of).
+let n = b.x.len();
+// Each pair's force on body i, for pass two.
+let (mut fx, mut fy) =
+    (vec![S::ZERO; n], vec![S::ZERO; n]);
+
+let mut acc_rest = acc;
+let (mut x_rest, mut y_rest, mut m_rest, mut w_rest) =
+    (&b.x[..], &b.y[..], &b.m[..], &b.w[..]);
+while let (
+    Some((a_i, acc_tail)),
+    Some((&px_i, x_tail)),
+    Some((&py_i, y_tail)),
+    Some((&m_i, m_tail)),
+    Some((&w_i, w_tail)),
+) = (
+    mem::take(&mut acc_rest).split_first_mut(),
+    x_rest.split_first(),
+    y_rest.split_first(),
+    m_rest.split_first(),
+    w_rest.split_first(),
+) {
+    // pass one: every later body
+    pass_one(
+        (px_i, py_i, g_const * m_i, eps_sq),
+        (x_tail, y_tail, m_tail, w_tail),
+        acc_tail,
+        (&mut fx, &mut fy),
+    );
+    // pass two: body i's sum, in 16 lanes
+    let len = acc_tail.len();
+    let sum_x = lane_sum(&fx[..len]);
+    let sum_y = lane_sum(&fy[..len]);
+    *a_i += Vec2::new(sum_x, sum_y) * w_i;
+    acc_rest = acc_tail;
+    (x_rest, y_rest, m_rest, w_rest) =
+        (x_tail, y_tail, m_tail, w_tail);
+}
+```
+
+</div>
+</SideBySide>
+
+**The pair loop.** Before, one pair at a time, body $i$'s sum added in
+order, and a branch for the 0/0 case. Now, pass one: every pair's force
+for body $i$ with nothing summed across pairs (so the compiler can do
+four at once), the branch a select, each force kept in `fx` / `fy`.
 
 <SideBySide>
 <div>
@@ -80,11 +175,11 @@ for (a_j, &(x_j, m_j, w_j)) in
     acc_tail.iter_mut().zip(body_tail)
 {
     let r = x_j - x_i;
-    let d_sq = r.length_sq() + g.softening_sq;
+    let d_sq = r.length_sq() + softening_sq;
     if d_sq == S::ZERO {
         continue; // coincident: skip, not 0/0
     }
-    let f = r * (g.g_const * m_i * m_j
+    let f = r * (g_const * m_i * m_j
         / (d_sq * d_sq.sqrt()));
     sum_i += f * w_i; // body i, in order
     *a_j -= f * w_j; // body j
@@ -95,7 +190,7 @@ for (a_j, &(x_j, m_j, w_j)) in
 </div>
 <div>
 
-**After** (pass one)
+**After:** `pass_one`
 
 ```rust
 let others = xs.iter().zip(ys).zip(ms).zip(ws);
@@ -118,7 +213,70 @@ for ((a_j, (((&px_j, &py_j), &m_j), &w_j)),
 </div>
 </SideBySide>
 
-Then the same loops as the compiler built them, `f32` on an Apple M4
+**Body $i$'s sum.** Before, one running total, one add per pair, in
+order: each add waits for the last. Now, 16 running totals (pair $j$ in
+lane $j \bmod 16$), added together at the end as a tree, halves first.
+The order is written in the source, so every target, vector or not, gives
+the same bits.
+
+<SideBySide>
+<div>
+
+**Before**
+
+```rust
+// In the pair loop, one add per pair:
+sum_i += f * w_i;
+// …and after it:
+*a_i = sum_i;
+```
+
+</div>
+<div>
+
+**After:** `lane_sum`, `lane_total`
+
+```rust
+fn lane_sum<S: Scalar>(values: &[S]) -> S {
+    let mut lanes = [S::ZERO; LANES]; // 16
+    let (chunks, rest) = values.as_chunks::<LANES>();
+    for chunk in chunks {
+        for (lane, &v) in lanes.iter_mut().zip(chunk) {
+            *lane += v;
+        }
+    }
+    for (lane, &v) in lanes.iter_mut().zip(rest) {
+        *lane += v;
+    }
+    lane_total(&lanes)
+}
+
+/// (l0 + l1) + (l2 + l3), … level by level.
+fn lane_total<S: Scalar>(lanes: &[S; LANES]) -> S {
+    let mut level = *lanes;
+    let mut width = LANES;
+    while width > 1 {
+        width /= 2;
+        let mut next = [S::ZERO; LANES];
+        let (pairs, _) = level.as_chunks::<2>();
+        for (sum, &[a, b]) in
+            next.iter_mut().zip(pairs).take(width)
+        {
+            *sum = a + b;
+        }
+        level = next;
+    }
+    let [total, ..] = level;
+    total
+}
+```
+
+</div>
+</SideBySide>
+
+### The pair loop in assembly
+
+The pair loops as the compiler built them, `f32` on an Apple M4
 (AArch64). **Before**, one pair an iteration: the 2-wide vectors
 (`.2s`) hold only that pair's $x$ and $y$, the square root and division
 are scalar (`fsqrt s16`, `fdiv s5`), and `fcmp` / `b.eq` is a branch that
