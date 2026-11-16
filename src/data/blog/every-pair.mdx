@@ -62,8 +62,64 @@ worth of numbers sit side by side, four pairs cost about what one did.
 
 ## The loop, before and after
 
-The hot loop as the compiler built it, before and after: `f32` on an
-Apple M4 (AArch64). **Before**, one pair an iteration: the 2-wide vectors
+In Rust first. **Before**, the pair loop as it was: one pair at a time,
+body $i$'s sum added in order, and a branch for the 0/0 case. **After**,
+the first of two passes: every pair's force for body $i$, nothing summed
+across pairs (so the compiler can do four at once), the branch a select,
+and each force kept in `fx` / `fy`. A second pass then adds those up in
+16 partial sums, in a fixed order.
+
+<SideBySide>
+<div>
+
+**Before**
+
+```rust
+let mut sum_i = *a_i;
+for (a_j, &(x_j, m_j, w_j)) in
+    acc_tail.iter_mut().zip(body_tail)
+{
+    let r = x_j - x_i;
+    let d_sq = r.length_sq() + g.softening_sq;
+    if d_sq == S::ZERO {
+        continue; // coincident: skip, not 0/0
+    }
+    let f = r * (g.g_const * m_i * m_j
+        / (d_sq * d_sq.sqrt()));
+    sum_i += f * w_i; // body i, in order
+    *a_j -= f * w_j; // body j
+}
+*a_i = sum_i;
+```
+
+</div>
+<div>
+
+**After** (pass one)
+
+```rust
+let others = xs.iter().zip(ys).zip(ms).zip(ws);
+let kept = fx.iter_mut().zip(fy.iter_mut());
+for ((a_j, (((&px_j, &py_j), &m_j), &w_j)),
+     (fx_j, fy_j)) in acc.iter_mut().zip(others).zip(kept)
+{
+    let (rx, ry) = (px_j - px_i, py_j - py_i);
+    let d_sq = rx * rx + ry * ry + eps_sq;
+    let s = g_mi * m_j / (d_sq * d_sq.sqrt());
+    // coincident: 0/0, selected away (no branch)
+    let s = if d_sq == S::ZERO { S::ZERO } else { s };
+    let (f_x, f_y) = (rx * s, ry * s);
+    a_j.x -= f_x * w_j; // body j
+    a_j.y -= f_y * w_j;
+    (*fx_j, *fy_j) = (f_x, f_y); // kept for body i
+}
+```
+
+</div>
+</SideBySide>
+
+Then the same loops as the compiler built them, `f32` on an Apple M4
+(AArch64). **Before**, one pair an iteration: the 2-wide vectors
 (`.2s`) hold only that pair's $x$ and $y$, the square root and division
 are scalar (`fsqrt s16`, `fdiv s5`), and `fcmp` / `b.eq` is a branch that
 skips two bodies exactly on top of each other with no softening (0/0).
