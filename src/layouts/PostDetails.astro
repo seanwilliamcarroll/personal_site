@@ -14,6 +14,10 @@ import { slugifyStr } from "@/utils/slugify";
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
 import { SITE } from "@/config";
+// KaTeX's styles, for math in posts (astro.config.ts: remark-math and
+// rehype-katex render it at build time). Posts only; its fonts are
+// fetched only by a page whose math uses them.
+import "katex/dist/katex.min.css";
 
 type Props = {
   post: CollectionEntry<"blog">;

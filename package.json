@@ -29,9 +29,12 @@
     "@tailwindcss/vite": "^4.3.5",
     "astro": "^7.4.7",
     "dayjs": "^1.11.23",
+    "katex": "^0.19.1",
     "lodash.kebabcase": "^4.1.1",
     "physics-engine": "https://github.com/seanwilliamcarroll/physics/releases/download/v0.2.0/physics-engine-0.2.0.tgz",
+    "rehype-katex": "^7.0.1",
     "remark-collapse": "^0.1.2",
+    "remark-math": "^6.0.0",
     "remark-toc": "^9.0.0",
     "satori": "^0.63.2",
     "sharp": "^0.35.5",
@@ -65,7 +68,8 @@
     "satori": {
       "fflate": "^0.7.5"
     },
-    "minimatch@>=7 <11.0.1": "^11.0.1"
+    "minimatch@>=7 <11.0.1": "^11.0.1",
+    "katex": "$katex"
   },
   "allowScripts": {
     "fsevents": false

@@ -5,6 +5,8 @@ import sitemap from "@astrojs/sitemap";
 import mdx from "@astrojs/mdx";
 import remarkToc from "remark-toc";
 import remarkCollapse from "remark-collapse";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 import {
   transformerNotationDiff,
   transformerNotationHighlight,
@@ -33,7 +35,12 @@ export default defineConfig({
       remarkPlugins: [
         remarkToc,
         [remarkCollapse, { test: "Table of contents" }],
+        // $…$ inline and $$…$$ display math, rendered to HTML by KaTeX at
+        // build time: no math JavaScript reaches the reader. Its styles
+        // are in the post layout (PostDetails.astro).
+        remarkMath,
       ],
+      rehypePlugins: [rehypeKatex],
     }),
     shikiConfig: {
       // For more themes, visit https://shiki.style/themes
