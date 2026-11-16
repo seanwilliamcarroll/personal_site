@@ -11,13 +11,13 @@ tags:
 import Gravity from "@/components/demo/Gravity.astro";
 import SideBySide from "@/components/SideBySide.astro";
 
-I've been interested in profiling and optimization for a few years now. I've done it a few times in professional code, though I've not really had the opportunity to do so lately. For the past several weeks, I've been having fun with Claude by building a physics engine from (mostly) vanilla Rust. The engine lives there and then I've had Claude wrap things in TypeScript when appropriate so I could display some visual demos on this site. I've written 0% of the code, all of it coming from Claude Opus 5.5 (and some from Fable 5.2 when I had the credit), but I've been managing the process. I've pushed for particular features, including gravity and collisions, acoustics in the form of physically simulating piano strings (an homage to a fun project from university), and some interesting swarming behvaior-related demos. All along, I'd been stopping my agent to do health checks of the codebase when I could: using cargo mutants, benchmarking with criterion, property testing, etc. in addition to the normal unit testing and coverage collection. I finally took the time now to pick a particular benchmark and see if I could improve things.
+I've been interested in profiling and optimization for a few years now. I've done it a few times in professional code, though I've not really had the opportunity to do so lately. For the past several weeks, I've been having fun with Claude by building a [physics engine](https://github.com/seanwilliamcarroll/physics) from (mostly) vanilla Rust. The engine is all Rust, and I've had Claude wrap things in TypeScript when appropriate so I could display some visual demos on this site. I've written 0% of the code, all of it coming from Claude (mostly Opus 5.5, and some Fable 5.2 when I had the credit), but I've been managing the process. I've pushed for particular features, including gravity and collisions, acoustics in the form of physically simulating piano strings (an homage to a fun project from university), and some interesting demos of swarming behavior. All along, I'd been stopping my agent to do health checks of the codebase when I could: mutation testing with [cargo-mutants](https://mutants.rs), benchmarking with [criterion](https://github.com/bheisler/criterion.rs), property testing and so on, in addition to the normal unit testing and coverage collection. Recently, I finally took the time to pick a particular benchmark and see if I could improve things.
 
-The following post describes what I and my agent did. I was primarily inspired by Casey Muratori's Simple Code, High Performance lecture, prompting me to examine assembly for some hot loops to see if I could get things to vectorize better.
+The following post describes what my agent and I did. I was primarily inspired by Casey Muratori's lecture [_Simple Code, High Performance_](https://www.youtube.com/watch?v=Ge3aKEmZcqY), which prompted me to examine the assembly of some hot loops to see if I could get them to vectorize better.
 
 <Gravity />
 
-The problem in question is calculating the forces of gravity on N discrete bodies.
+The problem in question is calculating the forces of gravity between $n$ discrete bodies.
 
 ## Background
 
@@ -55,12 +55,12 @@ worth of numbers sit side by side, four pairs cost about what one did.
   AVX2; 512 with AVX-512.
 - The compiler does the vectorizing (no intrinsics here); the work is
   arranging the loop so it can.
-- **The catch: the sum.** Body i's total force is a sum over every
+- **The catch: the sum.** Body $i$'s total force is a sum over every
   other body. Floating-point addition isn't associative, so adding in a
   different order gives different last bits, and the compiler won't
   reorder it on its own. The engine's results must be bit-identical
   natively and in WebAssembly, so the new order is written into the
-  source: body i's sum is kept in 16 partial sums ("lanes"), added
+  source: body $i$'s sum is kept in 16 partial sums ("lanes"), added
   together in a fixed order at the end.
 
 > **TODO:** your thinking about vectorizing the code: what you expected, what was tried (the notebook, docs/gravity-vectorize.md in physics, has every step and dead end), and what surprised you.
@@ -395,7 +395,7 @@ The largest cluster whose whole step fits in 10 ms (leaving room in a
 | Zen 5   | 5,984 bodies | 3,904 |
 | M4      | 6,240        | 4,416 |
 
-Before, about 3,950 fit in either.
+Before, on the M4, about 3,950 fit in either.
 
 > **TODO:** reading the numbers. Why Zen 5 gains so much more (its scalar square root and division were the bottleneck; the M4's are fast, so in f64 it had little to win), what AVX-512 shows, and WebAssembly within a few percent of native.
 
