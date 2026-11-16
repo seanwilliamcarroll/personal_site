@@ -23,8 +23,15 @@
     ul,
     figcaption,
     table,
-    code {
+    code,
+    .katex-display {
       @apply text-foreground;
+    }
+
+    /* Display math sits in the article itself, not in a paragraph: wide
+       formulas scroll sideways on a narrow screen rather than overflow. */
+    .katex-display {
+      @apply overflow-x-auto overflow-y-hidden;
     }
 
     a {
